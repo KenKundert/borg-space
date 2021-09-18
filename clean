@@ -1,0 +1,6 @@
+#!/bin/sh
+
+set nonomatch
+
+rm -f *.py[cod] */*.py[cod]
+rm -rf build *.egg-info dist __pycache__ */__pycache__ .coverage

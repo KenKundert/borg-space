@@ -42,6 +42,8 @@ from matplotlib.ticker import FuncFormatter
 data_dir = Path(user_data_dir('emborg'))
 now = str(arrow.now())
 Quantity.set_prefs(prec=2)
+__version__ = "0.0.0"
+__released__ = "2021-09-18"
 
 # graph_space() {{{1
 def graph_space(requests, log_scale):
@@ -139,7 +141,7 @@ def report_space(requests, show_size, record_size, message):
                     display(msg)
 
 # main {{{1
-cmdline = docopt(__doc__)
+cmdline = docopt(__doc__, version=__version__)
 
 requests = cmdline['<config>']
 if not requests:

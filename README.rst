@@ -33,12 +33,17 @@ configs::
 You can change the message by giving a template::
 
     > borg-space -m 'Repository for {config} is now {size}." home
-    Repository for home is now 2.81 GB.
+    Repository for rsync is now 2.81 GB.
+    Repository for borgbase is now 2.44 GB.
 
 The *config* key takes Python string format codes and the *size* key takes 
 `QuantiPhy 
 <https://quantiphy.readthedocs.io/en/stable/user.html#string-formatting>`_ 
-format codes
+format codes::
+
+    > borg-space -m '{config>10}: {size:b}." home
+         rsync: 2.62 GiB
+      borgbase: 2.26 GiB
 
 You can record the sizes with::
 
@@ -53,21 +58,20 @@ fixed times::
 
     00 12 * * *  borg-space -q -r home
 
-In this case the command runs at noon every day and the ``-q`` option to 
+In this case the command runs at noon every day and uses the ``-q`` option to 
 suppress the output to stdout.
 
-    00 12 * * *  borg-space -q -r home
-
-The other approach is to add *Borg-Space* as a *run_after_backup* setting in 
+The other approach is to add *Borg-Space* to the *run_after_backup* setting in 
 your *Emborg* configs.  That way it is run every time you create an archive::
 
     run_after_backup = [
-        'borg-space -r -m "Repository is now {{size:.2}}." {config_name}'
+        'borg-space -r -m "Repository is now {{size}}." {config_name}'
     ]
 
 Once you have recorded some values, you can graph them using::
 
     > borg-space -g home
+
 
 Installation
 ------------

@@ -1,0 +1,8 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+.bump.cfg
+build/
+*.egg-info/
+dist/
+.*.sw[po]
