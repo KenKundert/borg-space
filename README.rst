@@ -7,7 +7,7 @@ Borg-Space — Report and track the size of your Borg repositories
 
 *Borg-Space* is an accessory for `Emborg <https://emborg.readthedocs.io>`_.  It 
 reports on the space consumed by your *BorgBackup* repositories.  You can get 
-this information using the *Emborg* *info* command, but there are several 
+this information using the ``emborg info`` command, but there are several 
 reasons to prefer *Borg-Space*.  First, the *info* command gives a great deal of 
 information, whereas *Borg-Space* only reports the space consumed by the 
 repository, so is much more compact.  Second, the output message is user 
