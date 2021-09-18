@@ -158,7 +158,7 @@ try:
             cmdline['--message']
         )
 except (Error, nt.NestedTextError) as e:
-    e.report(cmdline['--log-y'])
+    e.report()
 except OSError as e:
     error(os_error(e))
 terminate()
