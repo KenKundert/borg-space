@@ -68,6 +68,10 @@ your *Emborg* configs.  That way it is run every time you create an archive::
         'borg-space -r -m "Repository is now {{size}}." {config_name}'
     ]
 
+Emborg also uses braces to interpolate values, so they are doubled-up in the 
+*Borg-Space* command to escape them (except for removing the second brace, 
+*Emborg* ignores double braces).
+
 Once you have recorded some values, you can graph them using::
 
     > borg-space -g home
