@@ -45,8 +45,8 @@ Quantity.set_prefs(prec=2)
 __version__ = "0.0.0"
 __released__ = "2021-09-18"
 
-# graph_space() {{{1
-def graph_space(requests, log_scale):
+# generate_graph() {{{1
+def generate_graph(requests, log_scale):
     configs = []
 
     # expand composite configs and gather the scalar configs {{{2
@@ -55,8 +55,7 @@ def graph_space(requests, log_scale):
             configs.extend(emborg.configs)
 
     # determine size history of each config's repository {{{2
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
+    traces = []
     for config in configs:
         data_path = data_dir / f'{config}-size.nt'
         data = nt.load(data_path, top=dict)
@@ -65,10 +64,18 @@ def graph_space(requests, log_scale):
         for date, size in data.items():
             dates.append(arrow.get(date))
             sizes.append(Quantity(size, 'B').real)
-        trace, = ax.plot_date(dates, sizes, "d-")
-        trace.set_label(config)
+        traces.append((config, Quantity(size, 'B'), dates, sizes))
 
     # plot the result {{{2
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+
+    # add traces in order of last size, largest to smallest
+    for entry in sorted(traces, key=lambda d: d[1], reverse=True):
+        name, last_size, dates, sizes = entry
+        trace, = ax.plot_date(dates, sizes, "d-")
+        trace.set_label(f'{name} ({last_size})')
+
     # configure the axis labeling {{{3
     # use SI scale factors on Y-axis
     def yFmt(y, pos=None):
@@ -81,11 +88,11 @@ def graph_space(requests, log_scale):
     fig.autofmt_xdate()
 
     # generate the graph {{{3
-    ax.legend()
+    ax.legend(loc='lower left')
     plt.show()
 
-# report_space() {{{1
-def report_space(requests, show_size, record_size, message):
+# generate_report() {{{1
+def generate_report(requests, show_size, record_size, message):
 
     for request in requests:
         # expand composite configs {{{2
@@ -149,9 +156,9 @@ if not requests:
 
 try:
     if cmdline['--graph']:
-        graph_space(requests, cmdline['--log-y'])
+        generate_graph(requests, cmdline['--log-y'])
     else:
-        report_space(
+        generate_report(
             requests,
             not cmdline['--quiet'],
             cmdline['--record'],
