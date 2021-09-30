@@ -7,7 +7,7 @@ Reports on the current size of one or more Borg repositories managed by Emborg.
 
 Usage:
     borg-space [--quiet] [--message <msg>] [--record] [<config>...]
-    borg-space [--graph] [--log-y] [<config>...]
+    borg-space [--graph] [--svg <file>] [--log-y] [<config>...]
 
 Options:
     -r, --record                save the result
@@ -15,6 +15,7 @@ Options:
     -m <msg>, --message <msg>   do not output the size message
     -g, --graph                 graph the previously recorded sizes over time
     -l, --log-y                 use a logarithmic Y-axis when graphing
+    -s <file>, --svg <file>     produce plot as SVG file rather than display it
 
 Results are saved to ~/.local/share/emborg/<config>-sizes.nt.
 <msg> may contain {size}, which is replaced with the measured size, and 
@@ -29,11 +30,12 @@ import arrow
 from appdirs import user_data_dir
 from docopt import docopt
 from emborg import Emborg
-from inform import Error, display, error, os_error, terminate
+from inform import Error, display, fatal, os_error, terminate
 from pathlib import Path
 from quantiphy import Quantity
 import json
 import nestedtext as nt
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
@@ -46,8 +48,10 @@ __version__ = "0.0.0"
 __released__ = "2021-09-18"
 
 # generate_graph() {{{1
-def generate_graph(requests, log_scale):
+def generate_graph(requests, svg_file, log_scale):
     configs = []
+    if svg_file:
+            matplotlib.use('SVG')
 
     # expand composite configs and gather the scalar configs {{{2
     for request in requests:
@@ -89,7 +93,10 @@ def generate_graph(requests, log_scale):
 
     # generate the graph {{{3
     ax.legend(loc='lower left')
-    plt.show()
+    if svg_file:
+        plt.savefig(svg_file)
+    else:
+        plt.show()
 
 # generate_report() {{{1
 def generate_report(requests, show_size, record_size, message):
@@ -98,6 +105,11 @@ def generate_report(requests, show_size, record_size, message):
         # expand composite configs {{{2
         with Emborg(request, emborg_opts=['no-log']) as emborg:
             configs = emborg.configs
+            if emborg.version < (1,27) or configs is None:
+                fatal(
+                    'emborg is too old.',
+                    codicil = "upgrade using 'pip install --user --upgrade emborg'."
+                )
 
         # iterate through configs {{{2
         for config in configs:
@@ -155,8 +167,8 @@ if not requests:
     requests = ['']  # this gets the default config
 
 try:
-    if cmdline['--graph']:
-        generate_graph(requests, cmdline['--log-y'])
+    if cmdline['--graph'] or cmdline['--svg']:
+        generate_graph(requests, cmdline['--svg'], cmdline['--log-y'])
     else:
         generate_report(
             requests,
@@ -167,5 +179,7 @@ try:
 except (Error, nt.NestedTextError) as e:
     e.report()
 except OSError as e:
-    error(os_error(e))
+    fatal(os_error(e))
+except KeyboardInterrupt:
+    pass
 terminate()

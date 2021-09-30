@@ -77,6 +77,18 @@ Once you have recorded some values, you can graph them using::
 
     > borg-space -g home
 
+This displays the graph on the screen. Alternately, you can save the graph to 
+a file in SVG format using::
+
+    > borg-space -s home.svg home
+
+I routinely monitor the repositories for over a dozen hosts, and to make it 
+convenient I create a composite *Emborg* configuration containing all the hosts, 
+and then use the ``--log-y`` option so that I can easily see all the results 
+scaled nicely on the same graph::
+
+    > borg-space -l all
+
 
 Installation
 ------------
