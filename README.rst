@@ -96,3 +96,22 @@ Installation
 Install with::
 
     > pip3 install --user borg-space
+
+
+Releases
+--------
+
+Latest development release
+..........................
+| Version: 0.0.1
+| Released: 2021-09-30
+
+
+0.1.0 (2021-09-30)
+.................
+- Added ability to save graph as SVG file.
+
+
+0.0.0 (2021-09-25)
+.................
+- Initial release
