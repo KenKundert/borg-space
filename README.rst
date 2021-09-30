@@ -2,7 +2,7 @@ Borg-Space — Report and track the size of your Borg repositories
 ================================================================
 
 :Author: Ken Kundert
-:Version: 0.0.1
+:Version: 0.1.0
 :Released: 2021-09-30
 
 *Borg-Space* is an accessory for `Emborg <https://emborg.readthedocs.io>`_.  It
@@ -103,7 +103,7 @@ Releases
 
 Latest development release
 ..........................
-| Version: 0.0.1
+| Version: 0.1.0
 | Released: 2021-09-30
 
 

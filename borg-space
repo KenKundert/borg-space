@@ -44,7 +44,7 @@ from matplotlib.ticker import FuncFormatter
 data_dir = Path(user_data_dir('emborg'))
 now = str(arrow.now())
 Quantity.set_prefs(prec=2)
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __released__ = "2021-09-30"
 
 # generate_graph() {{{1
