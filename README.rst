@@ -107,6 +107,11 @@ Latest development release
 | Released: 2021-09-30
 
 
+0.2.0 (2021-10-01)
+..................
+- Fixed incompatibility with *Emborg* version 1.26.
+
+
 0.1.0 (2021-09-30)
 ..................
 - Added ability to save graph as SVG file.

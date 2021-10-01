@@ -105,7 +105,7 @@ def generate_report(requests, show_size, record_size, message):
         # expand composite configs {{{2
         with Emborg(request, emborg_opts=['no-log']) as emborg:
             configs = emborg.configs
-            if emborg.version < (1,27) or configs is None:
+            if configs is None:
                 fatal(
                     'emborg is too old.',
                     codicil = "upgrade using 'pip install --user --upgrade emborg'."
