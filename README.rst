@@ -1,6 +1,15 @@
 Borg-Space — Report and track the size of your Borg repositories
 ================================================================
 
+.. image:: https://pepy.tech/badge/borg-space/month
+    :target: https://pepy.tech/project/borg-space
+
+.. image:: https://img.shields.io/pypi/v/borg-space.svg
+    :target: https://pypi.python.org/pypi/borg-space
+
+.. image:: https://img.shields.io/pypi/pyversions/borg-space.svg
+    :target: https://pypi.python.org/pypi/borg-space/
+
 :Author: Ken Kundert
 :Version: 0.2.0
 :Released: 2021-10-01
