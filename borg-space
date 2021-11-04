@@ -167,7 +167,7 @@ if not requests:
     requests = ['']  # this gets the default config
 
 try:
-    if cmdline['--graph'] or cmdline['--svg']:
+    if cmdline['--graph'] or cmdline['--svg'] or cmdline['--log-y']:
         generate_graph(requests, cmdline['--svg'], cmdline['--log-y'])
     else:
         generate_report(
