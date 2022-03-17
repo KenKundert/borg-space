@@ -55,7 +55,7 @@ def generate_graph(requests, svg_file, log_scale):
 
     # expand composite configs and gather the scalar configs {{{2
     for request in requests:
-        with Emborg(request, emborg_opts=['no-log']) as emborg:
+        with Emborg(request, emborg_opts=['no-log'], exclusive=False) as emborg:
             configs.extend(emborg.configs)
 
     # determine size history of each config's repository {{{2
@@ -103,7 +103,7 @@ def generate_report(requests, show_size, record_size, message):
 
     for request in requests:
         # expand composite configs {{{2
-        with Emborg(request, emborg_opts=['no-log']) as emborg:
+        with Emborg(request, emborg_opts=['no-log'], exclusive=False) as emborg:
             configs = emborg.configs
             if configs is None:
                 fatal(
@@ -113,7 +113,7 @@ def generate_report(requests, show_size, record_size, message):
 
         # iterate through configs {{{2
         for config in configs:
-            with Emborg(config, emborg_opts=['no-log']) as emborg:
+            with Emborg(config, emborg_opts=['no-log'], exclusive=False) as emborg:
 
                 # get name of latest archive {{{3
                 borg = emborg.run_borg(
