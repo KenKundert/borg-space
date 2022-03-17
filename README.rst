@@ -71,21 +71,16 @@ In this case the command runs at noon every day and uses the ``-q`` option to
 suppress the output to stdout.  This approach can be problematic if *Emborg*
 needs access to SSH or GPG keys to run.
 
-The other approach is to add *Borg-Space* to the *run_after_borg* setting in
-your *Emborg* configs.  That way it is run every time you run borg::
+The other approach is to add *Borg-Space* to the *run_after_backup* setting in
+your *Emborg* configs.  That way it is run every time you run backup::
 
-    run_after_borg = [
+    run_after_backup = [
         'borg-space -r -m "Repository is now {{size}}." {config_name}'
     ]
 
 *Emborg* also uses braces to interpolate values, so they are doubled-up in the
 *Borg-Space* command to escape them (except for removing the second brace,
 *Emborg* ignores double braces).
-
-It might seem better to use *run_after_backup* rather than *run_after_borg*, but 
-that does not work.  *Emborg* sets a lock file that prevents *Borg-Space* from 
-running.  That lock file is still in place when the *run_after_backup* commands 
-are run, but not when the *run_after_borg* commands are run.
 
 Once you have recorded some values, you can graph them using::
 
