@@ -5,7 +5,7 @@ with open("README.rst", encoding="utf-8") as file:
 
 setup(
     name = "borg-space",
-    version = "0.2.0",
+    version = "0.3.0",
     author = "Ken Kundert",
     author_email = "emborg@nurdletech.com",
     description = "Accessory for Emborg used to report and track the size of your Borg repositories",
