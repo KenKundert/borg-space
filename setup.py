@@ -19,7 +19,7 @@ setup(
         appdirs
         arrow>=0.15
         docopt
-        emborg>=1.30.5
+        emborg>=1.31
         inform>=1.26
         matplotlib
         nestedtext
