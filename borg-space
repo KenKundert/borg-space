@@ -12,7 +12,7 @@ Usage:
 Options:
     -r, --record                save the result
     -q, --quiet                 do not output the size message
-    -m <msg>, --message <msg>   do not output the size message
+    -m <msg>, --message <msg>   the size message
     -g, --graph                 graph the previously recorded sizes over time
     -l, --log-y                 use a logarithmic Y-axis when graphing
     -s <file>, --svg <file>     produce plot as SVG file rather than display it
@@ -22,8 +22,6 @@ Results are saved to ~/.local/share/emborg/<config>-sizes.nt.
 {config}, which is replaced by the config name.
 If no replacements are made, size is appended to the end of the message.
 """
-#   borg-space [-r] [-q] [-m] [<config>...]
-#   borg-space [-g] [-l] [<config>...]
 
 # imports {{{1
 import arrow

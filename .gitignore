@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 .bump.cfg
+.bump.cfg.nt
 build/
 *.egg-info/
 dist/

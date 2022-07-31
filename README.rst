@@ -116,6 +116,11 @@ Latest development release
 | Released: 2022-03-21
 
 
+0.3.0 (2022-03-21)
+..................
+- Upgrade required to support *Emborg* version 1.31.
+
+
 0.2.0 (2021-10-01)
 ..................
 - Fixed incompatibility with *Emborg* version 1.26.
