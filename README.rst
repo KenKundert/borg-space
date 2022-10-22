@@ -116,6 +116,11 @@ Latest development release
 | Released: 2022-07-31
 
 
+0.4.0 (2022-10-22)
+..................
+- Tweak graph axes labels.
+
+
 0.3.0 (2022-03-21)
 ..................
 - Upgrade required to support *Emborg* version 1.31.

@@ -28,14 +28,14 @@ import arrow
 from appdirs import user_data_dir
 from docopt import docopt
 from emborg import Emborg
-from inform import Error, display, fatal, os_error, terminate
+from inform import Error, display, error, os_error
 from pathlib import Path
 from quantiphy import Quantity
 import json
 import nestedtext as nt
 import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
+from matplotlib.dates import DateFormatter
 from matplotlib.ticker import FuncFormatter
 
 # globals {{{1
@@ -49,7 +49,7 @@ __released__ = "2022-07-31"
 def generate_graph(requests, svg_file, log_scale):
     configs = []
     if svg_file:
-            matplotlib.use('SVG')
+        matplotlib.use('SVG')
 
     # expand composite configs and gather the scalar configs {{{2
     for request in requests:
@@ -68,28 +68,36 @@ def generate_graph(requests, svg_file, log_scale):
             sizes.append(Quantity(size, 'B').real)
         traces.append((config, Quantity(size, 'B'), dates, sizes))
 
-    # plot the result {{{2
+    # plot the results {{{2
+    # create and configure the canvas {{{3
     fig = plt.figure()
     ax = fig.add_subplot(111)
+    if log_scale:
+        ax.set_yscale('log')
 
-    # add traces in order of last size, largest to smallest
+    # configure the axis labeling {{{3
+    ax.xaxis.set_major_formatter(DateFormatter('%b %g'))
+
+    # add traces in order of last size, largest to smallest {{{3
+    largest = 0
+    smallest = 1e100
     for entry in sorted(traces, key=lambda d: d[1], reverse=True):
         name, last_size, dates, sizes = entry
+        largest = max(largest, *sizes)
+        smallest = min(smallest, *sizes)
         trace, = ax.plot_date(dates, sizes, "d-")
         trace.set_label(f'{name} ({last_size})')
 
-    # configure the axis labeling {{{3
     # use SI scale factors on Y-axis
-    def yFmt(y, pos=None):
+    def bytes(y, pos=None):
         return Quantity(y, 'B').render()
-    ax.yaxis.set_major_formatter(FuncFormatter(yFmt))
-    if cmdline['--log-y']:
-        ax.set_yscale('log')
+    ax.yaxis.set_major_formatter(FuncFormatter(bytes))
+    if largest / smallest > 10:
+        ax.yaxis.set_minor_formatter("")
+    else:
+        ax.yaxis.set_minor_formatter(FuncFormatter(bytes))
 
-    # slant the dates on X-axis to make them fit better
-    fig.autofmt_xdate()
-
-    # generate the graph {{{3
+    # draw the graph {{{3
     ax.legend(loc='lower left')
     if svg_file:
         plt.savefig(svg_file)
@@ -104,7 +112,7 @@ def generate_report(requests, show_size, record_size, message):
         with Emborg(request, emborg_opts=['no-log'], exclusive=False) as emborg:
             configs = emborg.configs
             if configs is None:
-                fatal(
+                raise Error(
                     'emborg is too old.',
                     codicil = "upgrade using 'pip install --user --upgrade emborg'."
                 )
@@ -157,27 +165,30 @@ def generate_report(requests, show_size, record_size, message):
                         msg = f'{message}: {size_in_bytes}'
                     display(msg)
 
-# main {{{1
-cmdline = docopt(__doc__, version=__version__)
+# main() {{{1
+def main():
+    cmdline = docopt(__doc__, version=__version__)
 
-requests = cmdline['<config>']
-if not requests:
-    requests = ['']  # this gets the default config
+    requests = cmdline['<config>']
+    if not requests:
+        requests = ['']  # this gets the default config
 
-try:
-    if cmdline['--graph'] or cmdline['--svg'] or cmdline['--log-y']:
-        generate_graph(requests, cmdline['--svg'], cmdline['--log-y'])
-    else:
-        generate_report(
-            requests,
-            not cmdline['--quiet'],
-            cmdline['--record'],
-            cmdline['--message']
-        )
-except (Error, nt.NestedTextError) as e:
-    e.report()
-except OSError as e:
-    fatal(os_error(e))
-except KeyboardInterrupt:
-    pass
-terminate()
+    try:
+        if cmdline['--graph'] or cmdline['--svg'] or cmdline['--log-y']:
+            generate_graph(requests, cmdline['--svg'], cmdline['--log-y'])
+        else:
+            generate_report(
+                requests,
+                not cmdline['--quiet'],
+                cmdline['--record'],
+                cmdline['--message']
+            )
+    except (Error, nt.NestedTextError) as e:
+        e.report()
+    except OSError as e:
+        error(os_error(e))
+    except KeyboardInterrupt:
+        pass
+
+if __name__ == '__main__':
+    main()

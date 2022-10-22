@@ -1,0 +1,42 @@
+[project]
+name = "borg_space"
+dist-name = "borg-space"
+version = "0.3.1"
+description = "Accessory for Emborg used to report and track the size of your Borg repositories"
+readme = "README.rst"
+requires-python = ">=3.6"
+license = {file = "LICENSE"}
+keywords = ["emborg", "borg", "backups"]
+authors = [{name = "Ken Kundert", email = "emborg@nurdletech.com"}]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "appdirs",
+    "arrow>=0.15",
+    "docopt",
+    "emborg>=1.31",
+    "inform>=1.26",
+    "matplotlib",
+    "nestedtext",
+    "quantiphy",
+]
+
+[project.urls]
+homepage = "https://emborg.readthedocs.io"
+repository = "https://github.com/kenkundert/borg-space"
+
+[project.scripts]
+borg-space = "borg_space:main"
+
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
