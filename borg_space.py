@@ -16,6 +16,7 @@ Options:
     -g, --graph                 graph the previously recorded sizes over time
     -l, --log-y                 use a logarithmic Y-axis when graphing
     -s <file>, --svg <file>     produce plot as SVG file rather than display it
+    -n, --narrate               narrate the run
 
 Results are saved to ~/.local/share/emborg/<config>-sizes.nt.
 <msg> may contain {size}, which is replaced with the measured size, and 
@@ -28,14 +29,14 @@ import arrow
 from appdirs import user_data_dir
 from docopt import docopt
 from emborg import Emborg
-from inform import Error, display, error, os_error
+from inform import Inform, Error, display, error, os_error
 from pathlib import Path
 from quantiphy import Quantity
 import json
 import nestedtext as nt
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
+from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 from matplotlib.ticker import FuncFormatter
 
 # globals {{{1
@@ -76,7 +77,9 @@ def generate_graph(requests, svg_file, log_scale):
         ax.set_yscale('log')
 
     # configure the axis labeling {{{3
-    ax.xaxis.set_major_formatter(DateFormatter('%b %g'))
+    locator = AutoDateLocator()
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(AutoDateFormatter(locator))
 
     # add traces in order of last size, largest to smallest {{{3
     largest = 0
