@@ -11,8 +11,8 @@ Borg-Space — Report and track the size of your Borg repositories
     :target: https://pypi.python.org/pypi/borg-space/
 
 :Author: Ken Kundert
-:Version: 0.4.0
-:Released: 2022-10-22
+:Version: 0.4.1
+:Released: 2023-02-09
 
 *Borg-Space* is an accessory for `Emborg <https://emborg.readthedocs.io>`_.  It
 reports on the space consumed by your *BorgBackup* repositories.  You can get
@@ -112,8 +112,8 @@ Releases
 
 Latest development release
 ..........................
-| Version: 0.4.0
-| Released: 2022-10-22
+| Version: 0.4.1
+| Released: 2023-02-09
 
 
 0.4.0 (2022-10-22)
