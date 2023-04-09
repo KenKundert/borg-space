@@ -31,8 +31,10 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://emborg.readthedocs.io"
+homepage = "https://github.com/kenkundert/borg-space"
 repository = "https://github.com/kenkundert/borg-space"
+documentation = "https://github.com/KenKundert/borg-space/blob/master/README.rst"
+changelog = "https://github.com/KenKundert/ntlog/blob/master/CHANGELOG.rst"
 
 [project.scripts]
 borg-space = "borg_space:main"
