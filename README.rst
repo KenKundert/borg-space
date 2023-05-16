@@ -14,10 +14,9 @@ Borg-Space — Report and track the size of your Borg repositories
 :Version: 2.0rc1
 :Released: 2023-05-15
 
-*Borg-Space* is an accessory for `Emborg <https://emborg.readthedocs.io>`_.  It
-reports on the space consumed by your *BorgBackup* repositories.  You can get
-this information using the ``emborg info`` command, but there are several
-reasons to prefer *Borg-Space*.
+*Borg-Space* is an accessory for Emborg_.  It reports on the space consumed by 
+your *BorgBackup* repositories.  You can get this information using the ``emborg 
+info`` command, but there are several reasons to prefer *Borg-Space*.
 
 #. *Borg-Space* reports on many repositories at once.
 #. The *Emborg* *info* command gives a great deal of information,
@@ -49,8 +48,8 @@ To specify these repositories, a special naming scheme is used::
 
     ❬config❭@❬host❭~❬user❭
 
-Thus to access the *Emborg* configuration named *primary* owned by *root* on the 
-host with the SSH name *neptune* is accessed with::
+Thus the *Emborg* configuration named *primary* owned by *root* on the host with 
+the SSH name *neptune* is accessed with::
 
     # borg-space primary@neptune~root
     primary@neptune~root: 57.74 GB
@@ -65,7 +64,7 @@ Usage
     borg-space [--quiet] [--style <style>] [--record] [<repo>...]
     borg-space [--graph] [--svg <file>] [--log-y] [<repo>...]
 
-Options:
+Options::
     -r, --record                 save the result
     -q, --quiet                  do not output the size message
     -s <style>, --style <style>  the report style
@@ -76,11 +75,11 @@ Options:
 
 
 
-Configuration
--------------
+Settings
+--------
 
-You can create a `NestedText <https://nestedtext.org>`_ configuration file to 
-specify default behaviors and define composite repositories.  For example::
+You can create a NestedText_ settings file to specify default behaviors and 
+define composite repositories.  For example::
 
     default repository: home
     report style: tree
@@ -107,12 +106,13 @@ specify default behaviors and define composite repositories.  For example::
         all:
             children: home servers
 
-default repositories:
-    The name of the configuration to be used if one is not given on the command 
+default repository:
+    The name of the repository to be used if one is not given on the command 
     line.
 
 report style:
-    The report style to be used if none is specified on the command line.
+    The report style to be used if none is specified on the command line.  
+    Choose from *compact*, *normal*, *tree*, *nestedtext* or *nt*, or *json*.
 
 compact format:
     The format to be used for the line when the requested report style is 
@@ -120,8 +120,7 @@ compact format:
     The *repo*, *size*, *fmt*, *last_create*, *last_prune*, *last_compact* and 
     *last_squeeze*  fields will be replaced by the corresponding values.
     *last_squeeze* is simply the later of *last_prune* and *last_compact*.  
-    *size* is a *QuantiPhy* *Quantity* and the *last_* fields are all `Arrow 
-    <https://arrow.readthedocs.io/en/latest/guide.html#supported-tokens>`_ 
+    *size* is a QuantiPhy_ *Quantity* and the *last_* fields are all Arrow_ 
     objects.  The remaining field values are strings.
 
     The default is::
@@ -133,10 +132,9 @@ normal format:
     *normal*.  The *host*, *user*, *config*, *size*, *fmt*, *last_create*, 
     *last_prune*, *last_compact* and *last_squeeze*  fields will be replaced by 
     the corresponding values.  *last_squeeze* is simply the later of 
-    *last_prune* and *last_compact*.  *size* is a *QuantiPhy* *Quantity* and the 
-    *last_* fields are all `Arrow 
-    <https://arrow.readthedocs.io/en/latest/guide.html#supported-tokens>`_ 
-    objects.  The remaining field values are strings.
+    *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* and the 
+    *last_* fields are all Arrow_ objects.  The remaining field values are 
+    strings.
 
     The default is::
 
@@ -168,34 +166,33 @@ json report fields:
 
 size format:
     The format to be used when giving the size of the repository.  This is 
-    a `QuantiPhy 
-    <https://quantiphy.readthedocs.io/en/stable/api.html#quantiphy.Quantity.format>_
-    format string.  In the example, ``.2b`` means that a binary format with two 
-    extra digits is used (one digit is required. so ``.2b`` prints with three 
-    digits of precision.  If not give, it defaults to ``.2b``.
+    a QuantiPhy_ format string.  In the example, ``.2b`` means that a binary 
+    format with two extra digits is used (one digit is required. so ``.2b`` 
+    prints with three digits of precision.  If not give, it defaults to ``.2b``.
 
 nestedtext size format:
     The format to be used for the size of the repository when the requested 
-    report style is *nestedtext*.  If not given, it defaults to *size format*.
+    report style is jnestedtext*.  This is a QuantiPhy_ format string.  If not 
+    given, it defaults to *size format*.
 
 date format:
-    The format to be used for the date when the requested report style is *tree* 
-    or *nestedtext*.  If not given, it defaults to ``D MMMM YYYY``.
+    The Arrow_ format to be used for the date when the requested report style is 
+    *tree* or *nestedtext*.  If not given, it defaults to ``D MMMM YYYY``.
 
 repositories:
-    Predefines repositories.  This generally used to define composite 
+    Predefines available repositories.  This generally used to define composite 
     repositories.  In this way, one name can be used for many repositories.
 
 
 Graphing
 --------
 
-To graph the size over time you must first routinely record the size.  You can 
-record the sizes with::
+To graph the size of a repository over time you must first routinely record its 
+size.  You can record the sizes with::
 
     > borg-space -r home
 
-The sizes are added to the file ``~/.local/share/borg-space/{repo}.nt``.
+The sizes are added to the file ``~/.local/share/borg-space/❬repo❭.nt``.
 
 Typically you do not manually run *Borg-Space* to record the sizes of your
 repositories.  Instead, you can record sizes automatically in two different
@@ -238,3 +235,9 @@ Installation
 Install with::
 
     > pip3 install borg-space
+
+
+.. _emborg: https://emborg.readthedocs.io
+.. _nestedtext: https://nestedtext.org
+.. _arrow: https://arrow.readthedocs.io/en/latest/guide.html#supported-tokens
+.. _quantiphy: https://quantiphy.readthedocs.io/en/stable/api.html#quantiphy.Quantity.format
