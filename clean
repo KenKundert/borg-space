@@ -2,5 +2,11 @@
 
 set nonomatch
 
-rm -f *.py[cod] */*.py[cod]
+rm -rf .mypy_cache
+rm -f test.log test.log.nt
+
+# the rest is common to all python directories
+rm -f *.pyc *.pyo */*.pyc */*.pyo .test*.sum expected result install.out
 rm -rf build *.egg-info dist __pycache__ */__pycache__ .coverage
+rm -rf .eggs htmlcov
+rm -rf .cache .tox .hypothesis .pytest_cache */.pytest_cache

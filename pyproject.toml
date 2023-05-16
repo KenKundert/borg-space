@@ -12,23 +12,19 @@ classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Natural Language :: English",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3",
     "Topic :: Utilities",
 ]
 dependencies = [
     "appdirs",
-    "arrow>=0.15",
+    "arrow",
     "docopt",
-    "emborg>=1.31",
-    "inform>=1.26",
+    "inform",
     "matplotlib",
     "nestedtext",
     "quantiphy",
+    "shlib",
+    "voluptuous",
 ]
 
 [project.urls]
@@ -38,7 +34,7 @@ documentation = "https://github.com/KenKundert/borg-space/blob/master/README.rst
 changelog = "https://github.com/KenKundert/ntlog/blob/master/CHANGELOG.rst"
 
 [project.scripts]
-borg-space = "borg_space:main"
+borg-space = "borg_space.main:main"
 
 [build-system]
 requires = ["flit_core >=2,<4"]

@@ -7,6 +7,25 @@ Latest development release
 | Released: 2023-04-08
 
 
+2.0.0 (2023-05-15)
+------------------
+
+Version 2 of *Borg-Space* is a big change from earlier versions and is not 
+backward compatible.  With version 1 and earlier *Borg-Space* would read 
+*Emborg* configuration files to find the information it needed to call *Borg* 
+directly to determine the current amount of space required by a repository.  
+This results in *Borg* creating a local cache for the repository which could be 
+huge.  This version of *Borg-Space* exploits a new feature of *Emborg v1.36*, 
+which routinely records the space consumed by the repository.  This information 
+is available in ~/.local/share/emborg/❬config❭.latest.nt.  *Borg-Space* simply 
+reads this file, which saves considerable time and requires no additional disk 
+space.
+
+*Borg-Space 2* can access remote repositories, but user running *Borg-Space* 
+must have SSH access to the hosts being backed up, and the *Emborg* .latest.nt 
+files must be accessible.
+
+
 1.0.0 (2023-04-08)
 ------------------
 - Improve plotting.
