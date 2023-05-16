@@ -232,6 +232,8 @@ scaled nicely on the same graph::
 Installation
 ------------
 
+*Borg-Space* requires *Emborg* version 1.36 or newer.
+
 Install with::
 
     > pip3 install borg-space
