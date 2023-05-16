@@ -44,8 +44,8 @@ import pwd
 data_dir = Path(user_data_dir('borg-space'))
 now = str(arrow.now())
 Quantity.set_prefs(prec='full')
-__version__ = "1.0"
-__released__ = "2023-04-08"
+__version__ = "2.0rc1"
+__released__ = "2023-05-15"
 date_format = settings.get('date_format', 'D MMMM YYYY')
 size_format = settings.get('size_format', '.2b')
 nestedtext_size_format = settings.get('nestedtext_size_format', size_format)
