@@ -61,17 +61,17 @@ Usage
 *Borg-Space* supports the following command line arguments::
 
     Usage:
-    borg-space [--quiet] [--style <style>] [--record] [<repo>...]
-    borg-space [--graph] [--svg <file>] [--log-y] [<repo>...]
+        borg-space [--quiet] [--style <style>] [--record] [<repo>...]
+        borg-space [--graph] [--svg <file>] [--log-y] [<repo>...]
 
-Options::
-    -r, --record                 save the result
-    -q, --quiet                  do not output the size message
-    -s <style>, --style <style>  the report style
-                                 choose from compact, normal, tree, nt, json
-    -g, --graph                  graph the previously recorded sizes over time
-    -l, --log-y                  use a logarithmic Y-axis when graphing
-    -S <file>, --svg <file>      produce plot as SVG file rather than display it
+    Options:
+        -r, --record                 save the result
+        -q, --quiet                  do not output the size message
+        -s <style>, --style <style>  the report style
+                                     choose from compact, normal, tree, nt, json
+        -g, --graph                  graph the previously recorded sizes over time
+        -l, --log-y                  use a logarithmic Y-axis when graphing
+        -S <file>, --svg <file>      produce plot as SVG file rather than display it
 
 
 
