@@ -125,7 +125,7 @@ def generate_graph(repos, svg_file, log_scale):
         largest = max(largest, *sizes)
         smallest = min(smallest, *sizes)
         trace, = ax.plot_date(dates, sizes, "-")
-        trace.set_label(f'{name} ({last_size})')
+        trace.set_label(f'{name} ({last_size:{size_format}})')
 
     # use SI scale factors on Y-axis
     def bytes(y, pos=None):

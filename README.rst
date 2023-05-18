@@ -232,7 +232,7 @@ scaled nicely on the same graph::
 Installation
 ------------
 
-*Borg-Space* requires *Emborg* version 1.36 or newer.
+*Borg-Space* requires *Emborg* version 1.37 or newer.
 
 Install with::
 
