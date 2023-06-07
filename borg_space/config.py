@@ -1,63 +1,124 @@
+# Process settings file
+
+# IMPORTS {{{1
 from appdirs import user_config_dir
 from inform import (
-    Error, error, fatal, full_stop, is_str, is_mapping, os_error, terminate
+    Error, conjoin, error, fatal, full_stop,
+    is_str, is_mapping, is_collection, plural, os_error, terminate
 )
 from quantiphy import Quantity
-from voluptuous import Schema, Required, Invalid, MultipleInvalid
-import nestedtext as nt
+from shlib import to_path, Run, set_prefs
+from voluptuous import Schema, Invalid, MultipleInvalid
 import arrow
 import getpass
-from shlib import to_path, Run, set_prefs
+import nestedtext as nt
+import os
+import pwd
+import socket
+
+
+# TESTING MODS {{{1
+# this code overrides the home directory (only used for testing)
+new_home = os.environ.get('_BORG_SPACE__OVERRIDE_HOME_FOR_TESTING_')
+if new_home:
+    true_home = os.environ['HOME'].rstrip('/') + '/'
+    unaltered_to_path = to_path
+    def to_path(arg):
+        full_path = unaltered_to_path(arg).resolve()
+        as_str = str(full_path)
+        if as_str.startswith(true_home):
+            full_path = unaltered_to_path(new_home, as_str[len(true_home):])
+        return full_path
+
+# GLOBALS {{{1
 set_prefs(use_inform=True)
-
 settings_file = to_path(user_config_dir('borg-space')) / 'settings.nt'
-
 voluptuous_error_msg_mappings = {
     "extra keys not allowed": ("unknown key", "key"),
-    "expected a dictionary": ("expected key-value pair", "value"),
+    "expected a dictionary": ("expected key:value pair", "value"),
 }
+hostname = socket.gethostname().split('.')[0]
+    # version of the hostname (the hostname without any domain name)
+username = pwd.getpwuid(os.getuid()).pw_name
 
+
+# REPOSITORY {{{1
+# Repository class {{{2
 class Repository:
-    def __init__(self, config=None, host=None, user=None):
-        self.config = config
-        self.host = host
-        self.user = user
+    def __init__(self, spec, name=None):
+        if is_str(spec):
+            prefix, _, user = spec.partition('~')
+            config, _, host = prefix.partition('@')
+            if not config:
+                raise Error("missing value")
+        else:
+            config = spec.get('config')
+            host = spec.get('host')
+            user = spec.get('user')
+            spec = self.config
+            if self.host:
+                spec = f"{spec}@{self.host}"
+            if self.user:
+                spec = f"{spec}~{self.user}"
+        if not name:
+            name = spec
+
+        self.spec = spec
+        self.name = name
+        self.config = a_name(config)
+        self.host = a_name(host) or hostname
+        self.user = a_name(user) or username
         self.latest = None
 
     def __str__(self):
-        name = self.__class__.__name__
-        args = ', '.join(f'{k}={v}' for k, v in self.__dict__.items() if v)
-        return f"{name}({args})"
+        return f"{self.config}@{self.host}~{self.user}"
 
-    __repr__ = __str__
+    def __repr__(self):
+        return f'{self.__class__.__name__}("{str(self)}")'
 
-    def get_path(self, key=None):
+    def __getitem__(self, key):
+        if self.latest and key in self.latest:
+            return self.latest[key]
+        return self.__dict__[key]
+
+    def get(self, key, default=None):
+        try:
+            return self[key]
+        except KeyError:
+            return default
+
+    def as_dict(self):
+        info = dict(
+            name = self.name,
+            spec = self.spec,
+            config = self.config,
+            host = self.host,
+            user = self.user,
+            full_spec = str(self)
+        )
+        info.update(self.latest)
+        return info
+
+    def get_path(self):
         user = self.user if self.user else getpass.getuser()
-        config = self.config if self.config else key
+        config = self.config
+        assert config
         path = f"~{user}/.local/share/emborg/{config}.latest.nt"
         return (self.host, path)
 
-    def get_name(self, key=None):
-        name = self.config if self.config else key
-        if self.host:
-            name += '@' + self.host
-        if self.user:
-            name += '~' + self.user
-        return name
-
-    def get_repo(self):
+    def get_latest(self):
         if self.latest:
             return self.latest
-        path = self.get_path(None)[1]
-        if self.host:
-            cmd = ['ssh', self.host, f"cat {path}"]
+        host, path = self.get_path()
+        if host != hostname:
+            cmd = ['ssh', host, f"cat {path}"]
             ssh = Run(cmd, modes='sOEW')
             content = ssh.stdout
         else:
             try:
                 content = to_path(path).read_text()
             except FileNotFoundError:
-                raise Error('unknown configuration.', culprit=self.get_name(None))
+                raise Error('unknown repository.', culprit=str(self))
         raw_data = nt.loads(content)
         self.latest = data = {}
         if 'repository size' in raw_data:
@@ -72,85 +133,124 @@ class Repository:
             data['last_squeeze'] = max(data['last_prune'], data['last_compact'])
         return data
 
+# gather() {{{2
+def gather(repo):
+    try:
+        name = str(repo)
+    except TypeError:
+        return [repo]
+    if name in repositories:
+        return repositories[name]
+    return [repo]
+
+# get_repos() {{{2
+def get_repos(spec):
+    if not spec:
+        spec = settings.get('default_repository')
+    if not spec:
+        raise Error('there is no default repository.')
+
+    try:
+        children = repositories[spec]
+    except (TypeError, KeyError):
+        # not found in repositories specified in settings file.
+        # see if it exists on local machine
+        children = [Repository(spec)]
+
+    results = {}
+    for each in children:
+        for child in gather(each):
+            host, path = child.get_path()
+            name = str(child)
+            try:
+                child.get_latest()
+                results[name] = child
+            except Error as e:
+                e.report(culprit=name)
+            except OSError as e:
+                error(os_error(e), culprit=name)
+    return results
+
+
+# SCHEMA {{{1
+# to_snake_case() {{{2
 def to_snake_case(text):
     return '_'.join(text.lower().split())
 
+# normalize_key() {{{2
 def normalize_key(key, parent_keys):
     if len(parent_keys) == 1:
         return key
     return to_snake_case(key.replace('_', ' '))
 
-def must_be_identifier(arg):
-    if not arg:
-        return arg
-    if not is_str(arg):
-        raise Invalid("expected string")
-    if arg and not arg.isidentifier():
-        raise Invalid(f"{arg}: expected identifier")
-    return arg
-
-def as_list(args):
+# to_list() {{{2
+def to_list(args):
     if is_str(args):
         args = args.split()
     if is_mapping(args):
         raise Invalid(f"{args}: expected list or string")
     return args
 
-def split_repo_name(arg):
-    # extract components from: config@host~user
-    try:
-        config, _, user = arg.partition('~')
-        config, _, host = config.partition('@')
-        return (
-            must_be_identifier(config),
-            must_be_identifier(host),
-            must_be_identifier(user)
-        )
-    except AttributeError:
-        raise ValueError("expected string")
+# a_name() {{{2
+def a_name(arg):
+    # names are expected to be identifiers except that dashes are allowed
+    if not arg:
+        return arg
+    if not is_str(arg):
+        raise Invalid("expected string")
+    cleaned = arg.replace('-', '0')
+    if not cleaned.isidentifier():
+        raise Invalid(f"{arg}: expected a name")
+    return arg
 
-def as_repo(arg):
-    config, host, user = split_repo_name(arg)
-    return Repository(config, host, user)
+# a_spec() {{{2
+def a_spec(arg):
+    if is_str(arg):
+        return arg
+    if is_mapping(arg):
+        unknown_keys = arg.keys() - set(['config', 'host', 'user'])
+        if unknown_keys:
+            raise Invalid(f"unknown {plural(unknown_keys):key}: {conjoin(unknown_keys)}.")
+        if 'config' not in arg:
+            raise Invalid("config is a required key.")
+        spec = arg.get('config')
+        if arg.get('host'):
+            spec = f"{spec}@{arg.get('host')}"
+        if arg.get('user'):
+            spec = f"{spec}~{arg.get('user')}"
+        return spec
+    raise Invalid("expected a specification")
 
-def as_list_of_repos(repos):
-    if is_str(repos):
-        repos = repos.split()
-    if is_mapping(repos):
-        return must_be_a_repo(repos)
-    return [as_repo(repo) for repo in repos]
+# to_specs() {{{2
+def to_specs(arg):
+    if is_str(arg):
+        return [a_spec(r) for r in arg.split()]
+    if is_mapping(arg):
+        unknown_keys = arg.keys() - set(['config', 'host', 'user'])
+        if unknown_keys:
+            raise Invalid(f"unknown {plural(unknown_keys):key}: {conjoin(unknown_keys)}.")
+        return [a_spec(arg)]
+    if is_collection(arg):
+        return [a_spec(r) for r in arg]
+    raise Invalid("expected a repository specification")
 
-def must_be_a_repo(repo):
-    if is_str(repo):
-        return [as_repo(repo)]
-    if is_mapping(repo):
-        if 'children' in repo:
-            children = as_list_of_repos(repo.pop('children'))
-            if repo:
-                raise Invalid("children cannot be used with other fields")
-            return children
-        must_be_identifier(repo.get('config'))
-        must_be_identifier(repo.get('host'))
-        must_be_identifier(repo.get('user'))
-        return [Repository(**repo)]
-    raise Invalid("must me a string or a dictionary")
-
+# validate_settings {{{2
 validate_settings = Schema({
-    Required('repositories'): {str: must_be_a_repo},
+    'repositories': {a_name: to_specs},
     'default_repository': str,
     'report_style': str,
     'compact_format': str,
-    'normal_format': str,
-    'normal_header': str,
-    'report_fields': as_list,
-    'tree_report_fields': as_list,
-    'nestedtext_report_fields': as_list,
-    'nestedtext_size_format': str,
-    'json_report_fields': as_list,
+    'table_format': str,
+    'table_header': str,
+    'report_fields': to_list,
+    'tree_report_fields': to_list,
+    'nestedtext_report_fields': to_list,
+    'json_report_fields': to_list,
     'size_format': str,
     'date_format': str,
 })
 
+# READ SETTINGS FILE {{{1
 try:
     # load tables from file
     keymap = {}
@@ -161,12 +261,29 @@ try:
         keymap = keymap,
     )
 
-    # check structure of the file contends
     settings = validate_settings(settings)
-    repositories = settings['repositories']
+    specifications = settings.get('repositories', {})
+
+    # convert from specifications to Repository objects
+    repositories = {}
+    for name, specs in specifications.items():
+        if specs:
+            repositories[name] = []
+            alias = name if len(specs) <= 1 else None
+            for spec in specs:
+                if spec in repositories and spec != name:
+                    # this is a known (previously defined) repository
+                    repositories[name].extend(repositories[spec])
+                else:
+                    repositories[name].append(Repository(spec, alias))
+        else:
+            repositories[name] = [Repository(name)]
 
 except nt.NestedTextError as e:
     e.terminate()
+except FileNotFoundError:
+    settings = {}
+    repositories = {}
 except OSError as e:
     fatal(os_error(e), culprit=settings_file)
 except MultipleInvalid as e:  # report schema violations
@@ -182,46 +299,4 @@ except MultipleInvalid as e:  # report schema violations
             culprit = (settings_file, keys),
             codicil = codicil
         )
-    terminate("borg-space: terminated due to previously reported errors.")
-
-def gather(repo):
-    try:
-        name = repo.get_name(None)
-    except TypeError:
-        return [repo]
-    if name.isidentifier() and name in repositories:
-        return repositories[name]
-    return [repo]
-
-def get_repos(repo):
-    if not repo:
-        repo = settings.get('default_repository')
-    if not repo:
-        raise Error('there is no default repository.')
-
-    try:
-        children = repositories[repo]
-    except KeyError:
-        # not found in repositories specified in settings file.
-        # see if it exist on local machine
-        try:
-            children = [as_repo(repo)]
-        except Invalid as e:
-            raise Error(str(e))
-
-    results = {}
-
-    to_process = []
-    for child in children:
-        to_process.extend(gather(child))
-
-    for child in to_process:
-        host, path = child.get_path(repo)
-        name = child.get_name(repo)
-        try:
-            results[name] = child.get_repo()
-        except Error as e:
-            e.report(culprit=name)
-        except OSError as e:
-            error(os_error(e), culprit=name)
-    return results
+    terminate()

@@ -48,6 +48,9 @@ To specify these repositories, a special naming scheme is used::
 
     ❬config❭@❬host❭~❬user❭
 
+This is referred to as the full repository specification, or repository spec.  
+Both ❬host❭ and ❬user❭ are optional, ❬host❭ is not need when referring to the 
+local host and ❬user❭ is not needed when referring to the current user.
 Thus the *Emborg* configuration named *primary* owned by *root* on the host with 
 the SSH name *neptune* is accessed with::
 
@@ -68,7 +71,7 @@ Usage
         -r, --record                 save the result
         -q, --quiet                  do not output the size message
         -s <style>, --style <style>  the report style
-                                     choose from compact, normal, tree, nt, json
+                                     choose from compact, table, tree, nt, json
         -g, --graph                  graph the previously recorded sizes over time
         -l, --log-y                  use a logarithmic Y-axis when graphing
         -S <file>, --svg <file>      produce plot as SVG file rather than display it
@@ -84,25 +87,33 @@ define composite repositories.  For example::
     default repository: home
     report style: tree
     compact format: {repo}: {size:{fmt}}.  Last back up: {last_create:ddd, MMM DD}.  Last squeeze: {last_squeeze:ddd, MMM DD}.
-    normal format: {host:<8} {user:<5} {config:<9} {size:<8.2b} {last_create:ddd, MMM DD}
-    normal header: HOST     USER  CONFIG    SIZE     LAST BACK UP
+    table format: {host:<8} {user:<5} {config:<9} {size:<8.2b} {last_create:ddd, MMM DD}
+    table header: HOST     USER  CONFIG    SIZE     LAST BACK UP
     report fields: size last_create last_squeeze
     tree report fields: size
     date format: D MMMM YYYY
     size format: .b
-    nestedtext size format: .3b
 
     repositories:
+        # define some convenient aliases
+        dev: root@dev~root
+        mail: root@mail~root
+        files: root@files~root
+        bastion: root@bastion~root
+        media: root@media~root
+        web: root@web~root
+
+        # define useful combinations
         home:
             children: rsync borgbase
         servers:
             children:
-                - root@dev~root
-                - root@mail~root
-                - root@files~root
-                - root@bastion~root
-                - root@media~root
-                - root@web~root
+                - dev
+                - mail
+                - files
+                - bastion
+                - media
+                - web
         all:
             children: home servers
 
@@ -112,36 +123,40 @@ default repository:
 
 report style:
     The report style to be used if none is specified on the command line.  
-    Choose from *compact*, *normal*, *tree*, *nestedtext* or *nt*, or *json*.
+    Choose from *compact*, *table*, *tree*, *nestedtext* or *nt*, or *json*.
 
 compact format:
     The format to be used for the line when the requested report style is 
     *compact*.
-    The *repo*, *size*, *fmt*, *last_create*, *last_prune*, *last_compact* and 
-    *last_squeeze*  fields will be replaced by the corresponding values.
+    The *name*, *spec*, *full_spec*, *config*, *host*, *user*, *size*, *fmt*, 
+    *last_create*, *last_prune*, *last_compact* and *last_squeeze*  fields will 
+    be replaced by the corresponding values.
+    *name* is the name given the repository in the *repositories* setting.  
+    *spec* as specified, and *full_spec* is the full spec.  If a name is not 
+    available, *name* becomes the same as *spec*.
     *last_squeeze* is simply the later of *last_prune* and *last_compact*.  
     *size* is a QuantiPhy_ *Quantity* and the *last_* fields are all Arrow_ 
     objects.  The remaining field values are strings.
 
     The default is::
 
-        {repo}: {size:{fmt}}
+        {name}: {size:{fmt}}
 
-normal format:
+table format:
     The format to be used for the line when the requested report style is 
-    *normal*.  The *host*, *user*, *config*, *size*, *fmt*, *last_create*, 
-    *last_prune*, *last_compact* and *last_squeeze*  fields will be replaced by 
-    the corresponding values.  *last_squeeze* is simply the later of 
-    *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* and the 
-    *last_* fields are all Arrow_ objects.  The remaining field values are 
+    *table*.  The *name*, *spec*, *host*, *user*, *config*, *size*, *fmt*, 
+    *last_create*, *last_prune*, *last_compact* and *last_squeeze*  fields will 
+    be replaced by the corresponding values.  *last_squeeze* is simply the later 
+    of *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* and 
+    the *last_* fields are all Arrow_ objects.  The remaining field values are 
     strings.
 
     The default is::
 
         {host:8} {user:8} {config:8} {size:<8.2b}  {last_create:ddd, MMM DD}
 
-normal header:
-    The header to be printed just before the normal report.  It is used to give 
+table header:
+    The header to be printed just before the table report.  It is used to give 
     column headers.  Leave empty to suppress the header.
 
     The default is::
@@ -162,26 +177,74 @@ nestedtext report fields:
 
 json report fields:
     The fields to include in *json* style reports.
-    default.  If not given it defaults to the value of  *report fields*.
+    default.  If not given it defaults to all available size and date fields.
 
 size format:
     The format to be used when giving the size of the repository.  This is 
     a QuantiPhy_ format string.  In the example, ``.2b`` means that a binary 
     format with two extra digits is used (one digit is required. so ``.2b`` 
-    prints with three digits of precision.  If not give, it defaults to ``.2b``.
-
-nestedtext size format:
-    The format to be used for the size of the repository when the requested 
-    report style is jnestedtext*.  This is a QuantiPhy_ format string.  If not 
-    given, it defaults to *size format*.
+    prints with three digits of precision.  If not given, it defaults to 
+    ``.2b``.
 
 date format:
     The Arrow_ format to be used for the date when the requested report style is 
     *tree* or *nestedtext*.  If not given, it defaults to ``D MMMM YYYY``.
 
 repositories:
-    Predefines available repositories.  This generally used to define composite 
-    repositories.  In this way, one name can be used for many repositories.
+    Predefines available repositories.  This generally used to define aliases 
+    and composite repositories.  This is given as a collection of name:value 
+    pairs.  The value may contain zero or more repository specifications.  The 
+    specifications may be a strings or dictionaries.  The following are 
+    accepted::
+
+        repositiories:
+            home:
+                # home becomes an alias for home on localhost for current user
+
+        repositiories:
+            home: home-primary
+                # home becomes an alias for home-primary on localhost for current user
+
+        repositiories:
+            home: home@host~user
+                # home becomes an alias for home@host~user
+
+        repositiories:
+            home:
+                # home becomes an alias for home@host~user
+                config: home
+                host: host
+                user: user
+
+        repositiories:
+            all: home@host~user work@host~user
+                # all contains home@host~user and work@host~user
+
+        repositiories:
+            all:
+                # all contains home@host~user and work@host~user
+                - home@host~user
+                - work@host~user
+
+        repositiories:
+            all:
+                # all contains home@host~user and work@host~user
+                -
+                    config: home
+                    host: host
+                    user: user
+                -
+                    config: work
+                    host: host
+                    user: user
+
+        repositiories:
+            home: home@host~user
+                # home becomes an alias for home@host~user
+            work: work@host~user
+                # work becomes an alias for work@host~user
+            all: home work
+                # all contains home and work
 
 
 Graphing

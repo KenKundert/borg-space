@@ -6,28 +6,33 @@ Borg Space
 Reports on the current size of one or more Borg repositories managed by Emborg.
 
 Usage:
-    borg-space [--quiet] [--style <style>] [--record] [<repo>...]
-    borg-space [--graph] [--svg <file>] [--log-y] [<repo>...]
+    borg-space [--quiet] [--style <style>] [--record] [<spec>...]
+    borg-space [--graph] [--svg <file>] [--log-y] [<spec>...]
 
 Options:
     -r, --record                 save the result
     -q, --quiet                  do not output the size message
     -s <style>, --style <style>  the report style
-                                 choose from compact, normal, tree, nt, json
+                                 choose from compact, table, tree, nt, json
     -g, --graph                  graph the previously recorded sizes over time
     -l, --log-y                  use a logarithmic Y-axis when graphing
     -S <file>, --svg <file>      produce plot as SVG file rather than display it
 
+Repository specs take the form ❬name❭ or ❬config❭[@❬host❭][~❬user❭]. Items in
+brackets are optional and ❬name❭ is the name given for a repository the
+repositories setting.
+
 Results are saved to ~/.local/share/borg-space/<config>.nt.
+Settings are held in ~/.config/borg-space/settings.nt.
 """
 
 # imports {{{1
-from .config import settings, get_repos, split_repo_name
+from .config import settings, get_repos
 from .trees import tree
 import arrow
 from appdirs import user_data_dir
 from docopt import docopt
-from inform import Error, display, error, os_error
+from inform import Error, display, error, os_error, warn
 from pathlib import Path
 from quantiphy import Quantity
 import json
@@ -36,9 +41,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 from matplotlib.ticker import FuncFormatter
-import os
-import socket
-import pwd
 
 # globals {{{1
 data_dir = Path(user_data_dir('borg-space'))
@@ -49,25 +51,18 @@ __released__ = "2023-05-15"
 date_format = settings.get('date_format', 'D MMMM YYYY')
 size_format = settings.get('size_format', '.2b')
 nestedtext_size_format = settings.get('nestedtext_size_format', size_format)
-size_fields = ['size',]  # must be a single value
+size_fields = ['size',]  # must contain only one value
 date_fields = ['last_create', 'last_prune', 'last_compact', 'last_squeeze']
+all_fields = size_fields + date_fields
 report_fields = settings.get('report_fields', size_fields)
-
-# gethostname {{{1
-# returns short version of the hostname (the hostname without any domain name)
-def gethostname():
-    return socket.gethostname().split('.')[0]
-
-# getusername {{{1
-def getusername():
-    return pwd.getpwuid(os.getuid()).pw_name
+not_available = "⟪not available⟫"
 
 # collect_repos() {{{1
 def collect_repos(requests, record_size):
     repos = {}
     for request in requests:
-        repos = get_repos(request)
-        repos.update(repos)
+        new_repos = get_repos(request)
+        repos.update(new_repos)
 
     # record the size if requested {{{3
     if record_size:
@@ -80,13 +75,41 @@ def collect_repos(requests, record_size):
             except FileNotFoundError:
                 data = {}
 
-            # append new size
-            data[now] = repo['size'].fixed()
+            latest = repo.get_latest()
+            try:
+                # append new size
+                data[now] = latest['size'].fixed()
 
-            # write out sizes
-            nt.dump(data, data_path)
+                # write out sizes
+                nt.dump(data, data_path)
+            except KeyError:
+                warn('size not found, not recording.', culprit=name)
 
     return repos
+
+# formatter() {{{1
+def formatter(repo, fields, missing):
+    # formats the values of a repository field
+
+    def format(value, format):
+        if value is None:
+            return missing
+        if not format:
+            return str(value)
+        return value.format(format)
+
+    to_output = {}
+    for field in fields:
+        value = repo.get(field)
+        if field in size_fields:
+            value = format(value, size_format)
+        elif field in date_fields:
+            value = format(value, date_format)
+        to_output[field.replace('_', ' ')] = value
+    if len(to_output) == 1:
+        # output as a scalar if there is only one value
+        to_output = next(iter(to_output.values()))
+    return to_output
 
 # generate_graph() {{{1
 def generate_graph(repos, svg_file, log_scale):
@@ -97,7 +120,13 @@ def generate_graph(repos, svg_file, log_scale):
     traces = []
     for name in repos:
         data_path = data_dir / f'{name}.nt'
-        data = nt.load(data_path, top=dict)
+        try:
+            data = nt.load(data_path, top=dict)
+        except OSError as e:
+            raise Error(
+                os_error(e),
+                codicil="No history is available to plot, have you run with --record?"
+            )
         sizes = []
         dates = []
         for date, size in data.items():
@@ -128,8 +157,8 @@ def generate_graph(repos, svg_file, log_scale):
         trace.set_label(f'{name} ({last_size:{size_format}})')
 
     # use SI scale factors on Y-axis
-    def bytes(y, pos=None):
-        return Quantity(y, 'B').render()
+    def bytes(value, pos=None):
+        return Quantity(value, 'B').render()
     ax.yaxis.set_major_formatter(FuncFormatter(bytes))
     if largest / smallest > 10:
         ax.yaxis.set_minor_formatter("")
@@ -149,8 +178,8 @@ def print_report(repos, style):
         style = settings.get('report_style', 'compact')
     if style == 'compact':
         print_compact_report(repos)
-    elif style == 'normal':
-        print_normal_report(repos)
+    elif style == 'table':
+        print_table_report(repos)
     elif style == 'tree':
         print_tree_report(repos)
     elif style in ['nt', 'nestedtext']:
@@ -160,7 +189,7 @@ def print_report(repos, style):
     else:
         raise Error(
             "unknown style",
-            "choose from compact, normal, tree, nt or nestedtext, or json",
+            "choose from compact, table, tree, nt or nestedtext, or json",
             culprit = style
         )
 
@@ -171,84 +200,57 @@ def print_compact_report(repos):
     fmt = size_format
     msg_fmt = settings.get(
         'compact_format',
-        '{config}: {size:{fmt}}'
+        '{name}: {size:{fmt}}'
     )
 
     # report the sizes
     for name in sorted(repos):
         repo = repos[name]
-        msg = msg_fmt.format(repo=name, fmt=fmt, **repo)
-        display(msg)
+        try:
+            msg = msg_fmt.format(fmt=fmt, **repo.as_dict())
+            display(msg)
+        except KeyError as e:
+            warn('not available.', culprit=(name, e))
 
-# print_normal_report() {{{1
-def print_normal_report(repos):
+# print_table_report() {{{1
+def print_table_report(repos):
     # same number of lines as compact, but a bit more verbose
 
     fmt = size_format
-    hostname = gethostname()
-    username = getusername()
     msg_fmt = settings.get(
-        'normal_format',
+        'table_format',
         '{host:8} {user:8} {config:8} {size:<8.2b}  {last_create:ddd, MMM DD}'
-    )
-
-    # split config name, then sort by host, user, then config
-    repos = sorted(
-        (split_repo_name(name) + (repo,) for name, repo in repos.items()),
-        key = lambda k: (k[2], k[1], k[0])
     )
 
     # report the sizes
     header = settings.get(
-        'normal_header',
+        'table_header',
         'HOST     USER     CONFIG   SIZE      LAST BACK UP'
     )
     if header:
         display(header)
 
-    for cfg, hst, usr, repo in repos:
-        hst = hst or hostname
-        usr = usr or username
-        msg = msg_fmt.format(host=hst, user=usr, config=cfg, fmt=fmt, **repo)
-        display(msg)
+    for name in sorted(repos):
+        repo = repos[name]
+        try:
+            msg = msg_fmt.format(fmt=fmt, **repo.as_dict())
+            display(msg)
+        except KeyError as e:
+            warn('not available.', culprit=(name, e))
 
 # as_hierarchy() {{{1
-def as_hierarchy(repos, fmt, squeeze):
-    hostname = gethostname()
-    username = getusername()
-
-    # split config name, then sort by host, user, then config
-    repos = sorted(
-        (split_repo_name(name) + (repo,) for name, repo in repos.items()),
-        key = lambda k: (k[1], k[2], k[0])
-    )
-
+def as_hierarchy(repos, fmt, fields, missing):
     # convert hierarchy levels to dictionaries
-    if squeeze:
-        # lowest level is a list of strings rather than a dictionary
-        hierarchy = {}
-        for cfg, hst, usr, repo in repos:
-            hst = hst or hostname
-            usr = usr or username
-            if hst not in hierarchy:
-                hierarchy[hst] = {}
-            if usr not in hierarchy[hst]:
-                hierarchy[hst][usr] = [] if squeeze else {}
-            if cfg not in hierarchy[hst][usr]:
-                hierarchy[hst][usr].append(f"{cfg}: {fmt(repo)}")
-    else:
-        hierarchy = {}
-        # all levels are dictionaries, lowest level is dictionary of strings
-        for cfg, hst, usr, repo in repos:
-            hst = hst or hostname
-            usr = usr or username
-            if hst not in hierarchy:
-                hierarchy[hst] = {}
-            if usr not in hierarchy[hst]:
-                hierarchy[hst][usr] = [] if squeeze else {}
-            if cfg not in hierarchy[hst][usr]:
-                hierarchy[hst][usr][cfg] = fmt(repo)
-
+    hierarchy = {}
+    # all levels are dictionaries, lowest level is dictionary of strings
+    for name in sorted(repos):
+        repo = repos[name]
+        if repo.host not in hierarchy:
+            hierarchy[repo.host] = {}
+        if repo.user not in hierarchy[repo.host]:
+            hierarchy[repo.host][repo.user] = {}
+        if repo.config not in hierarchy[repo.host][repo.user]:
+            hierarchy[repo.host][repo.user][repo.config] = fmt(repo, fields, missing)
     return hierarchy
 
 # print_tree_report() {{{1
@@ -257,51 +259,46 @@ def print_tree_report(repos):
     # good when there are many repos per host & user
     fields = settings.get('tree_report_fields', report_fields)
 
-    def formatter(repo):
-        to_output = {}
-        for field in fields:
-            value = repo[field]
-            if field in size_fields:
-                value = value.format(size_format)
-            elif field in date_fields:
-                value = value.format(date_format) if date_format else str(value)
-            to_output[field] = value
-        return to_output
-
-    squeeze = fields == size_fields
-    if squeeze:
-        formatter = lambda r: r['size'].format(size_format)
-
-    display(tree(as_hierarchy(repos, fmt=formatter, squeeze=squeeze)))
+    display(
+        tree(
+            as_hierarchy(
+                repos,
+                fmt = formatter,
+                fields = fields,
+                missing = not_available,
+            )
+        )
+    )
 
 # print_nestedtext_report() {{{1
 def print_nestedtext_report(repos):
     # same number of lines as tree, but both computer & human readable
     fields = settings.get('nestedtext_report_fields', report_fields)
 
-    def formatter(repo):
-        to_output = {}
-        for field in fields:
-            value = repo[field]
-            if field in size_fields:
-                value = value.format(nestedtext_size_format)
-            elif field in date_fields:
-                value = value.format(date_format) if date_format else str(value)
-            to_output[field] = value
-        return to_output
-
-    display(nt.dumps(as_hierarchy(repos, fmt=formatter, squeeze=False)))
+    display(
+        nt.dumps(
+            as_hierarchy(
+                repos,
+                fmt = formatter,
+                fields = fields,
+                missing = not_available,
+            )
+        )
+    )
 
 # print_json_report() {{{1
 def print_json_report(repos):
     # easily computer readable, but awkward for people
-    fields = settings.get('json_report_fields', report_fields)
+    fields = settings.get('json_report_fields', all_fields)
 
-    def formatter(repo):
+    def formatter(repo, fields, missing):
         to_output = {}
+        info = repo.as_dict()
         for field in fields:
-            value = repo[field]
-            if field in size_fields:
+            value = info.get(field)
+            if value is None:
+                value = missing
+            elif field in size_fields:
                 value = int(value)
             elif field in date_fields:
                 value = str(value)
@@ -310,10 +307,15 @@ def print_json_report(repos):
 
     display(
         json.dumps(
-            as_hierarchy(repos, fmt=formatter, squeeze=False),
-            indent=4,
-            separators=(',', ': '),
-            ensure_ascii=False
+            as_hierarchy(
+                repos,
+                fmt = formatter,
+                fields = fields,
+                missing = None
+            ),
+            indent = 4,
+            separators = (',', ': '),
+            ensure_ascii = False
         )
     )
 
@@ -321,17 +323,17 @@ def print_json_report(repos):
 def main():
     cmdline = docopt(__doc__, version=__version__)
 
-    requests = cmdline['<repo>']
+    requests = cmdline['<spec>']
     if not requests:
         requests = ['']  # this gets the default config
 
     try:
         repos = collect_repos(requests, cmdline['--record'])
-
-        if cmdline['--graph'] or cmdline['--svg'] or cmdline['--log-y']:
-            generate_graph(repos, cmdline['--svg'], cmdline['--log-y'])
-        elif not cmdline['--quiet']:
-            print_report(repos, cmdline['--style'])
+        if repos:
+            if cmdline['--graph'] or cmdline['--svg'] or cmdline['--log-y']:
+                generate_graph(repos, cmdline['--svg'], cmdline['--log-y'])
+            elif not cmdline['--quiet']:
+                print_report(repos, cmdline['--style'])
     except (Error, nt.NestedTextError) as e:
         e.report()
     except OSError as e:

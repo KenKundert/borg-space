@@ -51,7 +51,7 @@ def _tree(data, key_suffix, top=False, leader=''):
     if hasattr(data, 'items'):
         last = len(data) - 1
         for i, item in enumerate(data.items()):
-            k, v = item
+            key, value = item
             # determine key-leader-supplement and item-leader-supplement
             if top:
                 kls = ''
@@ -59,19 +59,21 @@ def _tree(data, key_suffix, top=False, leader=''):
             elif i < last:
                 kls = connectors.item
                 ils = connectors.lead
-            elif i == last:
+            else:
                 kls = connectors.last_item
                 ils = connectors.last_lead
-            else:
-                raise NotImplementedError
-                kls = connectors.last_lead
-                ils = connectors.last_lead
 
-            # append dictionary to those already processed
-            lines += [
-                leader + kls + k + key_suffix,
-                _tree(v, key_suffix, leader = leader + ils) if v else None
-            ]
+            if is_collection(value):
+                # append dictionary to those already processed
+                lines += [
+                    leader + kls + key + key_suffix,
+                    _tree(value, key_suffix, leader = leader + ils) if value else None
+                ]
+            else:
+                # the value is a scalar, so squeeze key & value on one line
+                lines += [
+                    leader + kls + key + ': ' + value,
+                ]
         return '\n'.join(l for l in lines if l)
 
     elif not is_collection(data):
