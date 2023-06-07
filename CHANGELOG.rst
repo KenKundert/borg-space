@@ -3,7 +3,7 @@ Releases
 
 Latest development release
 --------------------------
-| Version: 2.1.dev1
+| Version: 2.1b1
 | Released: 2023-06-07
 
 
