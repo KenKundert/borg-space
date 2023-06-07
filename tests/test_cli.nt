@@ -813,8 +813,8 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > {
-            >     "kundert": {
-            >         "ken": {
+            >     "❬HOST❭": {
+            >         "❬USER❭": {
             >             "home": {
             >                 "size": 4453074629,
             >                 "last_create": "2023-06-02T10:24:24.658008-07:00",
@@ -855,8 +855,8 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > {
-            >     "kundert": {
-            >         "ken": {
+            >     "❬HOST❭": {
+            >         "❬USER❭": {
             >             "home": {
             >                 "size": 4453074629,
             >                 "last_create": "2023-06-02T10:24:24.658008-07:00",
@@ -1107,8 +1107,8 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > {
-            >     "kundert": {
-            >         "ken": {
+            >     "❬HOST❭": {
+            >         "❬USER❭": {
             >             "home": {
             >                 "size": null,
             >                 "last_create": null,

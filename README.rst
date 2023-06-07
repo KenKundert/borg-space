@@ -1,5 +1,5 @@
-Borg-Space — Report and track the size of your Borg repositories
-================================================================
+Borg-Space — Report and track the size of your Emborg repositories
+==================================================================
 
 .. image:: https://pepy.tech/badge/borg-space/month
     :target: https://pepy.tech/project/borg-space
@@ -15,10 +15,10 @@ Borg-Space — Report and track the size of your Borg repositories
 :Released: 2023-06-07
 
 *Borg-Space* is an accessory for Emborg_.  It reports on the space consumed by 
-your *BorgBackup* repositories.  You can get this information using the ``emborg 
-info`` command, but there are several reasons to prefer *Borg-Space*.
+your *BorgBackup* repositories.  You can get this information using the
+``emborg info`` command, but there are several reasons to prefer *Borg-Space*.
 
-#. *Borg-Space* reports on many repositories at once.
+#. *Borg-Space* is capable of reporting on many repositories at once.
 #. The *Emborg* *info* command gives a great deal of information,
    whereas *Borg-Space* only reports the space consumed by the repository,
    so is much more compact.
@@ -118,8 +118,7 @@ define composite repositories.  For example::
             children: home servers
 
 default repository:
-    The name of the repository to be used if one is not given on the command 
-    line.
+    The name of the repository to be used if none are given on the command line.
 
 report style:
     The report style to be used if none is specified on the command line.  
@@ -129,14 +128,15 @@ compact format:
     The format to be used for the line when the requested report style is 
     *compact*.
     The *name*, *spec*, *full_spec*, *config*, *host*, *user*, *size*, *fmt*, 
-    *last_create*, *last_prune*, *last_compact* and *last_squeeze*  fields will 
-    be replaced by the corresponding values.
-    *name* is the name given the repository in the *repositories* setting.  
-    *spec* as specified, and *full_spec* is the full spec.  If a name is not 
-    available, *name* becomes the same as *spec*.
-    *last_squeeze* is simply the later of *last_prune* and *last_compact*.  
-    *size* is a QuantiPhy_ *Quantity* and the *last_* fields are all Arrow_ 
-    objects.  The remaining field values are strings.
+    *last_create*, *last_prune*, *last_compact* and *last_squeeze*  fields are 
+    replaced by the corresponding values.  *name* is the name given the 
+    repository in the *repositories* setting.  *spec* is the specification given 
+    as specified, and *full_spec* is the full specification.  If a name is not 
+    available, *name* becomes the same as *spec*.  *last_squeeze* is simply the 
+    later of *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* 
+    and the *last_* fields are all Arrow_ objects (see the example in the next 
+    section for examples on how to specify formatting on *QuantiPhy* and *Arrow* 
+    objects).  The remaining field values are strings.
 
     The default is::
 
@@ -168,16 +168,16 @@ report fields:
     default.  Default is *size*, *last_create*, and *last_squeeze*.
 
 tree report fields:
-    The fields to include in *tree* style reports.
-    default.  If not given it defaults to the value of  *report fields*.
+    The fields to include in *tree* style reports.  If not given it defaults to 
+    the value of *report fields*.
 
 nestedtext report fields:
-    The fields to include in *nestedtext* style reports.
-    default.  If not given it defaults to the value of *report fields*.
+    The fields to include in *nestedtext* style reports.  If not given it 
+    defaults to the value of *report fields*.
 
 json report fields:
-    The fields to include in *json* style reports.
-    default.  If not given it defaults to all available size and date fields.
+    The fields to include in *json* style reports.  If not given it defaults to 
+    all available size and date fields.
 
 size format:
     The format to be used when giving the size of the repository.  This is 
@@ -191,11 +191,10 @@ date format:
     *tree* or *nestedtext*.  If not given, it defaults to ``D MMMM YYYY``.
 
 repositories:
-    Predefines available repositories.  This generally used to define aliases 
-    and composite repositories.  This is given as a collection of name:value 
-    pairs.  The value may contain zero or more repository specifications.  The 
-    specifications may be a strings or dictionaries.  The following are 
-    accepted::
+    Defines repository aliases and composite repositories.  Given as 
+    a collection of name:value pairs.  The value may contain zero or more 
+    repository specifications.  The specifications may be a strings or 
+    dictionaries.  The following forms are accepted::
 
         repositiories:
             home:
@@ -255,7 +254,7 @@ size.  You can record the sizes with::
 
     > borg-space -r home
 
-The sizes are added to the file ``~/.local/share/borg-space/❬repo❭.nt``.
+The sizes are added to the file ``~/.local/share/borg-space/❬full_spec❭.nt``.
 
 Typically you do not manually run *Borg-Space* to record the sizes of your
 repositories.  Instead, you can record sizes automatically in two different
