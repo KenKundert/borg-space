@@ -73,6 +73,7 @@ def collect_repos(requests, record_size):
             try:
                 data = nt.load(data_path, top=dict)
             except FileNotFoundError:
+                data_path.parent.mkdir(parents=True, exist_ok=True)
                 data = {}
 
             latest = repo.get_latest()
