@@ -11,7 +11,7 @@ Borg-Space — Report and track the size of your Emborg repositories
     :target: https://pypi.python.org/pypi/borg-space/
 
 :Author: Ken Kundert
-:Version: 2.1b1
+:Version: 2.1.dev1
 :Released: 2023-06-07
 
 *Borg-Space* is an accessory for Emborg_.  It reports on the space consumed by 
@@ -64,8 +64,8 @@ Usage
 *Borg-Space* supports the following command line arguments::
 
     Usage:
-        borg-space [--quiet] [--style <style>] [--record] [<repo>...]
-        borg-space [--graph] [--svg <file>] [--log-y] [<repo>...]
+        borg-space [--quiet] [--style <style>] [--record] [<spec>...]
+        borg-space [--graph] [--svg <file>] [--log-y] [<spec>...]
 
     Options:
         -r, --record                 save the result
@@ -86,7 +86,7 @@ define composite repositories.  For example::
 
     default repository: home
     report style: tree
-    compact format: {repo}: {size:{fmt}}.  Last back up: {last_create:ddd, MMM DD}.  Last squeeze: {last_squeeze:ddd, MMM DD}.
+    compact format: {name}: {size:{fmt}}.  Last back up: {last_create:ddd, MMM DD}.  Last squeeze: {last_squeeze:ddd, MMM DD}.
     table format: {host:<8} {user:<5} {config:<9} {size:<8.2b} {last_create:ddd, MMM DD}
     table header: HOST     USER  CONFIG    SIZE     LAST BACK UP
     report fields: size last_create last_squeeze
@@ -126,17 +126,17 @@ report style:
 
 compact format:
     The format to be used for the line when the requested report style is 
-    *compact*.
-    The *name*, *spec*, *full_spec*, *config*, *host*, *user*, *size*, *fmt*, 
-    *last_create*, *last_prune*, *last_compact* and *last_squeeze*  fields are 
-    replaced by the corresponding values.  *name* is the name given the 
-    repository in the *repositories* setting.  *spec* is the specification given 
-    as specified, and *full_spec* is the full specification.  If a name is not 
-    available, *name* becomes the same as *spec*.  *last_squeeze* is simply the 
-    later of *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* 
-    and the *last_* fields are all Arrow_ objects (see the example in the next 
-    section for examples on how to specify formatting on *QuantiPhy* and *Arrow* 
-    objects).  The remaining field values are strings.
+    *compact*.  The *name*, *spec*, *full_spec*, *config*, *host*, *user*, 
+    *size*, *fmt*, *last_create*, *last_prune*, *last_compact* and 
+    *last_squeeze*  fields are replaced by the corresponding values.  *name* is 
+    the name given the repository in the *repositories* setting.  *spec* is the 
+    specification given as specified, and *full_spec* is the full specification.  
+    If a name is not available, *name* becomes the same as *spec*.  
+    *last_squeeze* is simply the later of *last_prune* and *last_compact*.  
+    *size* is a QuantiPhy_ *Quantity* and the *last_* fields are all Arrow_ 
+    objects (see the example in the next section for examples on how to specify 
+    formatting on *QuantiPhy* and *Arrow* objects).  The remaining field values 
+    are strings.
 
     The default is::
 
