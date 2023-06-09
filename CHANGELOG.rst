@@ -20,6 +20,7 @@ are changes that are not backward compatible:
   otherwise they will be ignored.  For example, if you currently have *home.nt* 
   in this directory, then you should rename it to 
   *home@❬your_hostname❭~❬your_username❭*.
+- The *repo* key has been replaced by *name*, *spec*, and *full_spec*.
 
 
 2.0.0 (2023-05-15)

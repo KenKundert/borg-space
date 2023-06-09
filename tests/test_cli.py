@@ -42,7 +42,7 @@ borg_space_schema = Schema({
     Optional('stderr', default="^$"): str,
     Optional('status', default=0): to_int,
     Optional('env', default={}): dict,
-    Optional('tmp_files', default={}): {str:Any(str, {str:str})},
+    Optional('tmp_files', default={}): Any(dict(), {str:Any(str, {str:str})}),
 }, required=True)#
 
 # Time Conversions {{{2
@@ -69,11 +69,12 @@ def make_parameterized_file(path, meta):
 
 # RUN BORG-SPACE{{{1
 def check_command(name, args, env, stdout, stderr, status, home):
-    env = {
-        **os.environ,
-        '_BORG_SPACE__OVERRIDE_HOME_FOR_TESTING_': home,
-        **env,
-    }
+    if home:
+        env = {
+            **os.environ,
+            '_BORG_SPACE__OVERRIDE_HOME_FOR_TESTING_': home,
+            **env,
+        }
     cmd = './bs ' + sub_local_names(args)
     stderr = sub_local_names(stderr)
     stdout = sub_local_names(stdout)

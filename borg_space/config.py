@@ -20,7 +20,7 @@ import socket
 # TESTING MODS {{{1
 # this code overrides the home directory (only used for testing)
 new_home = os.environ.get('_BORG_SPACE__OVERRIDE_HOME_FOR_TESTING_')
-if new_home:
+if new_home:  # pragma: no cover
     true_home = os.environ['HOME'].rstrip('/') + '/'
     unaltered_to_path = to_path
     def to_path(arg):
@@ -46,20 +46,10 @@ username = pwd.getpwuid(os.getuid()).pw_name
 # Repository class {{{2
 class Repository:
     def __init__(self, spec, name=None):
-        if is_str(spec):
-            prefix, _, user = spec.partition('~')
-            config, _, host = prefix.partition('@')
-            if not config:
-                raise Error("missing value")
-        else:
-            config = spec.get('config')
-            host = spec.get('host')
-            user = spec.get('user')
-            spec = self.config
-            if self.host:
-                spec = f"{spec}@{self.host}"
-            if self.user:
-                spec = f"{spec}~{self.user}"
+        prefix, _, user = spec.partition('~')
+        config, _, host = prefix.partition('@')
+        if not config:
+            raise Error("spec is missing Emborg config name.", culprit=spec)
         if not name:
             name = spec
 
@@ -133,16 +123,6 @@ class Repository:
             data['last_squeeze'] = max(data['last_prune'], data['last_compact'])
         return data
 
-# gather() {{{2
-def gather(repo):
-    try:
-        name = str(repo)
-    except TypeError:
-        return [repo]
-    if name in repositories:
-        return repositories[name]
-    return [repo]
-
 # get_repos() {{{2
 def get_repos(spec):
     if not spec:
@@ -158,17 +138,16 @@ def get_repos(spec):
         children = [Repository(spec)]
 
     results = {}
-    for each in children:
-        for child in gather(each):
-            host, path = child.get_path()
-            name = str(child)
-            try:
-                child.get_latest()
-                results[name] = child
-            except Error as e:
-                e.report(culprit=name)
-            except OSError as e:
-                error(os_error(e), culprit=name)
+    for child in children:
+        host, path = child.get_path()
+        name = str(child)
+        try:
+            child.get_latest()
+            results[name] = child
+        except Error as e:
+            e.report(culprit=name)
+        except OSError as e:
+            error(os_error(e), culprit=name)
     return results
 
 

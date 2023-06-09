@@ -1,6 +1,17 @@
 # test all formats without key entries, such as size, create time
 test_main:
 
+    erupt:
+        # runs without a config file or any arugments
+        stdout:
+            > bs error: there is no default repository.
+
+    monarchy:
+        # runs without a config file or any arugments
+        args: @localhost
+        stdout:
+            > bs error: @localhost: spec is missing Emborg config name.
+
     sprint:
         # runs without a config file
         args: home
@@ -680,7 +691,10 @@ test_main:
                 type: parametrized
                 content:
                     > report style: tree
-                    > report fields: size last_create last_squeeze
+                    > report fields:
+                    >     - size
+                    >     - last_create
+                    >     - last_squeeze
                     > repositories:
                     >     all: home@❬HOST❭~❬USER❭ work@❬HOST❭~❬USER❭
             .local/share/emborg/home.latest.nt:
