@@ -50,8 +50,8 @@ from matplotlib.ticker import FuncFormatter
 data_dir = Path(user_data_dir('borg-space'))
 now = str(arrow.now())
 Quantity.set_prefs(prec='full')
-__version__ = "2.1b2"
-__released__ = "2023-06-08"
+__version__ = "2.1"
+__released__ = "2023-06-09"
 date_format = settings.get('date_format', 'D MMMM YYYY')
 size_format = settings.get('size_format', '.2b')
 nestedtext_size_format = settings.get('nestedtext_size_format', size_format)
