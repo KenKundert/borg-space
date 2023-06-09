@@ -32,8 +32,8 @@ To show the size of one or more repositories, simply run::
     # borg-space home
     home: 12.81 GB
 
-You can specify any number of repositories, and they can be composite
-configs::
+You can specify any number of repositories, and they can be composites.  IN the 
+following example, *home* is an alias that expands to *borgbase* and *rsync*::
 
     > borg-space home cache
     borgbase: 2.44 GB
@@ -49,8 +49,8 @@ To specify these repositories, a special naming scheme is used::
     ❬config❭@❬host❭~❬user❭
 
 This is referred to as the full repository specification, or repository spec.  
-Both ❬host❭ and ❬user❭ are optional, ❬host❭ is not need when referring to the 
-local host and ❬user❭ is not needed when referring to the current user.
+Both ``@❬host❭`` and ``~❬user❭`` are optional, ❬host❭ is not need when referring 
+to the local host and ❬user❭ is not needed when referring to the current user.
 Thus the *Emborg* configuration named *primary* owned by *root* on the host with 
 the SSH name *neptune* is accessed with::
 
