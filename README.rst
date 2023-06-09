@@ -45,8 +45,9 @@ machines.  In this case you will need permission to read the *Emborg* data
 directory for the repository. Specifically, 
 ❬host❭:~❬user❭/.local/share/emborg/❬config❭.latest.nt must be accessible.
 ❬config❭ is the name of the *Emborg* configuration to be reported on, ❬host❭ is 
-the name of the host on which the *Emborg create* command is being run, and 
-❬user❭ is the name of the user running the command.
+the name of the host on which the *Emborg create* command was run, and ❬user❭ is 
+the name of the user that ran the command.
+
 To specify these repositories, a special naming scheme is used::
 
     ❬config❭@❬host❭~❬user❭
@@ -68,7 +69,7 @@ Usage
 
     Usage:
         borg-space [--quiet] [--style <style>] [--record] [<spec>...]
-        borg-space [--graph] [--svg <file>] [--log-y][--record] [<spec>...]
+        borg-space [--graph] [--svg <file>] [--log-y] [--record] [<spec>...]
 
     Options:
         -r, --record                 save the result
@@ -87,7 +88,7 @@ The available styles are *compact*, *table*, *tree*, *nt* or *nestedtext*, or
 *json*.  If you specify something other than the these, what you give is taken 
 to be a *compact format* specification.
 
-Results are saved to ~/.local/share/borg-space/<config>.nt.
+Results are saved to ~/.local/share/borg-space/<full_spec>.nt.
 Settings are held in ~/.config/borg-space/settings.nt.
 
 

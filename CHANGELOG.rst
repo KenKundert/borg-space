@@ -7,15 +7,15 @@ Latest development release
 | Released: 2023-06-08
 
 
-2.1.0 (2023-06-??)
+2.1.0 (2023-06-09
 ------------------
 
 This version fixes a number of issues with the prior version.  In addition there 
 are changes that are not backward compatible:
 
-- The *repositories* setting is not limited to being a dictionary.
+- The *repositories* setting is now limited to being a dictionary.
 - The *normal* style has been renamed *table*.
-- The files in ~/.local/share/borg-space are use the full spec as the base of 
+- The files in ~/.local/share/borg-space all use the full spec as the base of 
   their name.  Any files that do not follow this convention must be renamed, 
   otherwise they will be ignored.  For example, if you currently have *home.nt* 
   in this directory, then you should rename it to 

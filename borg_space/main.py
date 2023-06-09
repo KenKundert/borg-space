@@ -26,7 +26,7 @@ The available styles are compact, table, tree, nt or nestedtext, or json.
 If you specify something other than the these, what you give is taken to be a
 compact format specification.
 
-Results are saved to ~/.local/share/borg-space/<config>.nt.
+Results are saved to ~/.local/share/borg-space/<full-spec>.nt.
 Settings are held in ~/.config/borg-space/settings.nt.
 """
 
