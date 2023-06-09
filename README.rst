@@ -32,7 +32,7 @@ To show the size of one or more repositories, simply run::
     # borg-space home
     home: 12.81 GB
 
-You can specify any number of repositories, and they can be composites.  IN the 
+You can specify any number of repositories, and they can be composites.  In the 
 following example, *home* is an alias that expands to *borgbase* and *rsync*::
 
     > borg-space home cache
@@ -44,15 +44,18 @@ You can specify repositories that are owned by others or that are on remote
 machines.  In this case you will need permission to read the *Emborg* data 
 directory for the repository. Specifically, 
 ❬host❭:~❬user❭/.local/share/emborg/❬config❭.latest.nt must be accessible.
+❬config❭ is the name of the *Emborg* configuration to be reported on, ❬host❭ is 
+the name of the host on which the *Emborg create* command is being run, and 
+❬user❭ is the name of the user running the command.
 To specify these repositories, a special naming scheme is used::
 
     ❬config❭@❬host❭~❬user❭
 
 This is referred to as the full repository specification, or repository spec.  
-Both ``@❬host❭`` and ``~❬user❭`` are optional, ❬host❭ is not need when referring 
-to the local host and ❬user❭ is not needed when referring to the current user.
-Thus the *Emborg* configuration named *primary* owned by *root* on the host with 
-the SSH name *neptune* is accessed with::
+Both ``@❬host❭`` and ``~❬user❭`` are optional, ❬host❭ is not needed when 
+referring to the local host and ❬user❭ is not needed when referring to the 
+current user.  Thus the *Emborg* configuration named *primary* owned by *root* 
+on the host with the SSH name *neptune* is accessed with::
 
     # borg-space primary@neptune~root
     primary@neptune~root: 57.74 GB
@@ -65,7 +68,7 @@ Usage
 
     Usage:
         borg-space [--quiet] [--style <style>] [--record] [<spec>...]
-        borg-space [--graph] [--svg <file>] [--log-y] [<spec>...]
+        borg-space [--graph] [--svg <file>] [--log-y][--record] [<spec>...]
 
     Options:
         -r, --record                 save the result
@@ -76,6 +79,16 @@ Usage
         -l, --log-y                  use a logarithmic Y-axis when graphing
         -S <file>, --svg <file>      produce plot as SVG file rather than display it
 
+Repository specs take the form ``❬name❭`` or ``❬config❭[@❬host❭][~❬user❭]``.  
+Items in brackets are optional and ❬name❭ is the name given for a repository the
+repositories setting.
+
+The available styles are *compact*, *table*, *tree*, *nt* or *nestedtext*, or 
+*json*.  If you specify something other than the these, what you give is taken 
+to be a *compact format* specification.
+
+Results are saved to ~/.local/share/borg-space/<config>.nt.
+Settings are held in ~/.config/borg-space/settings.nt.
 
 
 Settings
@@ -96,16 +109,18 @@ define composite repositories.  For example::
 
     repositories:
         # define some convenient aliases
+        root: root~root
         dev: root@dev~root
         mail: root@mail~root
         files: root@files~root
         bastion: root@bastion~root
         media: root@media~root
         web: root@web~root
+        cluster: home@cluster
 
         # define useful combinations
         home:
-            children: rsync borgbase
+            children: rsync borgbase cluster
         servers:
             children:
                 - dev
@@ -115,7 +130,7 @@ define composite repositories.  For example::
                 - media
                 - web
         all:
-            children: home servers
+            children: home servers root
 
 default repository:
     The name of the repository to be used if none are given on the command line.
@@ -130,13 +145,13 @@ compact format:
     *size*, *fmt*, *last_create*, *last_prune*, *last_compact* and 
     *last_squeeze*  fields are replaced by the corresponding values.  *name* is 
     the name given the repository in the *repositories* setting.  *spec* is the 
-    specification given as specified, and *full_spec* is the full specification.  
-    If a name is not available, *name* becomes the same as *spec*.  
-    *last_squeeze* is simply the later of *last_prune* and *last_compact*.  
-    *size* is a QuantiPhy_ *Quantity* and the *last_* fields are all Arrow_ 
-    objects (see the example in the next section for examples on how to specify 
-    formatting on *QuantiPhy* and *Arrow* objects).  The remaining field values 
-    are strings.
+    specification given as specified, and *full_spec* is the full specification 
+    (any pieces missing from *spec* are filled in).  If a name is not available, 
+    *name* becomes the same as *spec*.  *last_squeeze* is simply the later of 
+    *last_prune* and *last_compact*.  *size* is a QuantiPhy_ *Quantity* and the 
+    *last_* fields are all Arrow_ objects (see the example in the next section 
+    for examples on how to specify formatting on *QuantiPhy* and *Arrow* 
+    objects).  The remaining field values are strings.
 
     The default is::
 

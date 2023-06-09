@@ -7,7 +7,7 @@ Reports on the current size of one or more Borg repositories managed by Emborg.
 
 Usage:
     borg-space [--quiet] [--style <style>] [--record] [<spec>...]
-    borg-space [--graph] [--svg <file>] [--log-y] [<spec>...]
+    borg-space [--graph] [--svg <file>] [--log-y] [--record] [<spec>...]
 
 Options:
     -r, --record                 save the result
@@ -21,6 +21,10 @@ Options:
 Repository specs take the form ❬name❭ or ❬config❭[@❬host❭][~❬user❭]. Items in
 brackets are optional and ❬name❭ is the name given for a repository the
 repositories setting.
+
+The available styles are compact, table, tree, nt or nestedtext, or json.
+If you specify something other than the these, what you give is taken to be a
+compact format specification.
 
 Results are saved to ~/.local/share/borg-space/<config>.nt.
 Settings are held in ~/.config/borg-space/settings.nt.
@@ -178,7 +182,7 @@ def print_report(repos, style):
     if not style:
         style = settings.get('report_style', 'compact')
     if style == 'compact':
-        print_compact_report(repos)
+        print_compact_report(repos, None)
     elif style == 'table':
         print_table_report(repos)
     elif style == 'tree':
@@ -188,21 +192,17 @@ def print_report(repos, style):
     elif style == 'json':
         print_json_report(repos)
     else:
-        raise Error(
-            "unknown style",
-            "choose from compact, table, tree, nt or nestedtext, or json",
-            culprit = style
-        )
+        print_compact_report(repos, style)
 
 # print_compact_report() {{{1
-def print_compact_report(repos):
+def print_compact_report(repos, style):
     # most compact, but has awkward config labels
 
     fmt = size_format
-    msg_fmt = settings.get(
-        'compact_format',
-        '{name}: {size:{fmt}}'
-    )
+    if style:
+        msg_fmt = style
+    else:
+        msg_fmt = settings.get('compact_format', '{name}: {size:{fmt}}')
 
     # report the sizes
     for name in sorted(repos):
