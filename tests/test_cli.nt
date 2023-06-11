@@ -4,13 +4,13 @@ test_main:
     erupt:
         # runs without a config file or any arugments
         stdout:
-            > bs error:[\s+]there is no default repository.
+            > bs error:\s+there is no default repository.
 
     monarchy:
         # runs without a config file or any arugments
         args: @localhost
         stdout:
-            > bs error:[\s+]@localhost: spec is missing Emborg config name.
+            > bs error:\s+@localhost: spec is missing Emborg config name.
 
     sprint:
         # runs without a config file
@@ -99,7 +99,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:[\s+]/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            1 ❬repositories:❭
             >                            ▲
@@ -117,7 +117,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:[\s+]/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            1 ❬repositories: home❭
             >                             ▲
@@ -136,7 +136,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:[\s+]/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            2 ❬    - home❭
             >                   ▲
@@ -909,7 +909,7 @@ test_main:
                 > compact last run: 2023-06-04T13:25:32.162572-07:00
                 > repository size: 1.959665139 GB
         stdout:
-            > bs warning:[\s+]home@❬HOST❭~❬USER❭, 'size': not available.
+            > bs warning:\s+home@❬HOST❭~❬USER❭, 'size':\s+not available.
             > work@❬HOST❭~❬USER❭: 1.83 GiB
 
     plummy:
@@ -936,7 +936,7 @@ test_main:
                 > compact last run: 2023-06-04T13:25:32.162572-07:00
         stdout:
             > home: 4.15 GiB.  Last back up: Fri, Jun 02.  Last squeeze: Sat, May 27.
-            > bs warning:[\s+]work@❬HOST❭~❬USER❭, 'size': not available.
+            > bs warning:\s+work@❬HOST❭~❬USER❭, 'size':\s+not available.
 
     combat:
         # simple table report style
@@ -959,7 +959,7 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > HOST     USER     CONFIG   SIZE      LAST BACK UP
-            > bs warning:[\s+]home@❬HOST❭~❬USER❭, 'size': not available.
+            > bs warning:\s+home@❬HOST❭~❬USER❭, 'size':\s+not available.
             > ❬HOST❭\s+❬USER❭\s+work     1.83 GiB  Sun, Jun 04
 
     envision:
@@ -986,7 +986,7 @@ test_main:
         stdout:
             > HOST     USER  CONFIG    SIZE     LAST BACK UP
             > ❬HOST❭\s+❬USER❭\s+home      4.15 GiB Fri, Jun 02
-            > bs warning:[\s+]work@❬HOST❭~❬USER❭, 'size': not available.
+            > bs warning:\s+work@❬HOST❭~❬USER❭, 'size':\s+not available.
 
     extend:
         # simple tree report style
