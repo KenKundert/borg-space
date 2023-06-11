@@ -165,7 +165,7 @@ def generate_graph(repos, svg_file, log_scale):
 
     # use SI scale factors on Y-axis
     def bytes(value, pos=None):
-        return Quantity(value, 'B').render()
+        return Quantity(value, 'B').render(prec=3)
     ax.yaxis.set_major_formatter(FuncFormatter(bytes))
     if largest / smallest > 10:
         ax.yaxis.set_minor_formatter("")
