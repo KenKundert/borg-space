@@ -151,6 +151,8 @@ def generate_graph(repos, svg_file, log_scale):
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(AutoDateFormatter(locator))
 
+    fig.autofmt_xdate()
+
     # add traces in order of last size, largest to smallest {{{3
     largest = 0
     smallest = 1e100
