@@ -173,11 +173,13 @@ def to_list(args):
 # a_name() {{{2
 def a_name(arg):
     # names are expected to be identifiers except that dashes are allowed
+    # also allow names starting with a digit
     if not arg:
         return arg
     if not is_str(arg):
         raise Invalid("expected string")
-    cleaned = arg.replace('-', '0')
+    cleaned = 'A' + arg.replace('-', '0')
+        # add 'A' prefix to allow leading digits, replace '-' to allow dashes
     if not cleaned.isidentifier():
         raise Invalid(f"{arg}: expected a name")
     return arg
