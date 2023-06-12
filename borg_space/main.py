@@ -151,6 +151,8 @@ def generate_graph(repos, svg_file, log_scale):
     ax.xaxis.set_major_locator(locator)
     ax.xaxis.set_major_formatter(AutoDateFormatter(locator))
 
+    fig.autofmt_xdate()
+
     # add traces in order of last size, largest to smallest {{{3
     largest = 0
     smallest = 1e100
@@ -163,7 +165,7 @@ def generate_graph(repos, svg_file, log_scale):
 
     # use SI scale factors on Y-axis
     def bytes(value, pos=None):
-        return Quantity(value, 'B').render()
+        return Quantity(value, 'B').render(prec=3)
     ax.yaxis.set_major_formatter(FuncFormatter(bytes))
     if largest / smallest > 10:
         ax.yaxis.set_minor_formatter("")
