@@ -3,8 +3,8 @@
 # IMPORTS {{{1
 from appdirs import user_config_dir
 from inform import (
-    Error, conjoin, error, fatal, full_stop,
-    is_str, is_mapping, is_collection, plural, os_error, terminate
+    Error, conjoin, error, full_stop,
+    is_str, is_mapping, is_collection, plural, os_error, terminate_if_errors
 )
 from quantiphy import Quantity
 from shlib import to_path, Run, set_prefs
@@ -37,6 +37,7 @@ voluptuous_error_msg_mappings = {
     "extra keys not allowed": ("unknown key", "key"),
     "expected a dictionary": ("expected key:value pair", "value"),
 }
+voluptuous_key_prefix = "key contains"
 hostname = socket.gethostname().split('.')[0]
     # version of the hostname (the hostname without any domain name)
 username = pwd.getpwuid(os.getuid()).pw_name
@@ -55,9 +56,12 @@ class Repository:
 
         self.spec = spec
         self.name = name
-        self.config = a_name(config)
-        self.host = a_name(host) or hostname
-        self.user = a_name(user) or username
+        try:
+            self.config = a_name(config)
+            self.host = a_name(host) or hostname
+            self.user = a_name(user) or username
+        except Invalid as e:
+            raise Error(e)
         self.latest = None
 
     def __str__(self):
@@ -167,22 +171,32 @@ def to_list(args):
     if is_str(args):
         args = args.split()
     if is_mapping(args):
-        raise Invalid(f"{args}: expected list or string")
+        raise Invalid(f"expected a list or string")
     return args
 
 # a_name() {{{2
-def a_name(arg):
+def a_name(arg, is_key=False):
     # names are expected to be identifiers except that dashes are allowed
     # also allow names starting with a digit
     if not arg:
         return arg
     if not is_str(arg):
-        raise Invalid("expected string")
+        raise Invalid("expected a string")
     cleaned = 'A' + arg.replace('-', '0')
         # add 'A' prefix to allow leading digits, replace '-' to allow dashes
     if not cleaned.isidentifier():
-        raise Invalid(f"{arg}: expected a name")
+        from string import ascii_letters as letters, digits
+        invalid = ''.join(sorted(set(cleaned) - set(letters + digits + '-_')))
+        desc = f"{plural(invalid):/an invalid character/invalid characters}"
+        if is_key:
+            raise Invalid(f"key contains {desc}: ‘{invalid}’")
+        else:
+            raise Invalid(f"value contains {desc}: ‘{invalid}’")
     return arg
+
+# key_as_name() {{{2
+def key_as_name(arg):
+    return a_name(arg, is_key=True)
 
 # a_spec() {{{2
 def a_spec(arg):
@@ -217,7 +231,7 @@ def to_specs(arg):
 
 # validate_settings {{{2
 validate_settings = Schema({
-    'repositories': {a_name: to_specs},
+    'repositories': {key_as_name: to_specs},
     'default_repository': str,
     'report_style': str,
     'compact_format': str,
@@ -260,18 +274,22 @@ try:
         else:
             repositories[name] = [Repository(name)]
 
+except Error as e:
+    e.report(culprit=settings_file)
 except nt.NestedTextError as e:
-    e.terminate()
+    e.report()
 except FileNotFoundError:
     settings = {}
     repositories = {}
 except OSError as e:
-    fatal(os_error(e), culprit=settings_file)
+    error(os_error(e))
 except MultipleInvalid as e:  # report schema violations
     for err in e.errors:
         msg, flag = voluptuous_error_msg_mappings.get(
             err.msg, (err.msg, 'value')
         )
+        if msg.startswith(voluptuous_key_prefix):
+            flag = 'key'
         loc = keymap.get(tuple(err.path))
         codicil = loc.as_line(flag) if loc else None
         keys = nt.join_keys(err.path, keymap=keymap)
@@ -280,4 +298,4 @@ except MultipleInvalid as e:  # report schema violations
             culprit = (settings_file, keys),
             codicil = codicil
         )
-    terminate()
+terminate_if_errors()

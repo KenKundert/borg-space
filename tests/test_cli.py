@@ -56,8 +56,12 @@ UnitConversion("s", "y Y year years", 365*24*60*60)
 Quantity.set_prefs(ignore_sf=True)
 
 # substitutions {{{2
-def sub_local_names(text):
-    return text.replace('❬HOST❭', hostname).replace('❬USER❭', username)
+def sub_local_names(text, home=None):
+    text = text.replace('❬HOST❭', hostname)
+    text = text.replace('❬USER❭', username)
+    if home:
+        text = text.replace('❬HOME❭', str(home))
+    return text
 
 # process temp file parametrization {{{2
 @tmp_file_type('parametrized')
@@ -75,15 +79,17 @@ def check_command(name, args, env, stdout, stderr, status, home):
             '_BORG_SPACE__OVERRIDE_HOME_FOR_TESTING_': home,
             **env,
         }
-    cmd = './bs ' + sub_local_names(args)
-    stderr = sub_local_names(stderr)
-    stdout = sub_local_names(stdout)
+    cmd = './bs ' + sub_local_names(args, home=home)
+    stderr = sub_local_names(stderr, home=home)
+    stdout = sub_local_names(stdout, home=home)
 
     print(f"Running: {name}")
-    process = Run(cmd, "sOEW*", env=env)
-    Matches(stderr, flags=re.DOTALL).assert_matches(process.stderr)
-    Matches(stdout, flags=re.DOTALL).assert_matches(process.stdout)
-    assert status == process.status
+    borg_space = Run(cmd, "sOEW*", env=env)
+    # debug(result=borg_space.stdout)
+    # debug(expected=stdout)
+    Matches(stderr, flags=re.DOTALL).assert_matches(borg_space.stderr)
+    Matches(stdout, flags=re.DOTALL).assert_matches(borg_space.stdout)
+    assert status == borg_space.status
 
 
 # TESTS {{{1

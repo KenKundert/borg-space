@@ -36,7 +36,7 @@ from .trees import tree
 import arrow
 from appdirs import user_data_dir
 from docopt import docopt
-from inform import Error, display, error, os_error, warn
+from inform import Error, display, error, os_error, terminate, warn
 from pathlib import Path
 from quantiphy import Quantity
 import json
@@ -343,3 +343,4 @@ def main():
         error(os_error(e))
     except KeyboardInterrupt:
         pass
+    terminate()

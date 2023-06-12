@@ -7,7 +7,15 @@ Latest development release
 | Released: 2023-06-09
 
 
-2.1.0 (2023-06-09
+2.2.0 (2023-06-11)
+------------------
+
+This version allows host names to begin with a digit and improves the 
+consistency of error the error handling.  It also improves the formatting of the 
+X and Y axis labels.
+
+
+2.1.0 (2023-06-09)
 ------------------
 
 This version fixes a number of issues with the prior version.  In addition there 

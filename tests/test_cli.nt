@@ -5,12 +5,14 @@ test_main:
         # runs without a config file or any arugments
         stdout:
             > bs error:\s+there is no default repository.
+        status: 1
 
     monarchy:
         # runs without a config file or any arugments
         args: @localhost
         stdout:
             > bs error:\s+@localhost: spec is missing Emborg config name.
+        status: 1
 
     sprint:
         # runs without a config file
@@ -99,7 +101,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            1 ❬repositories:❭
             >                            ▲
@@ -117,7 +119,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            1 ❬repositories: home❭
             >                             ▲
@@ -136,7 +138,7 @@ test_main:
                 > compact last run: 2023-05-27T11:32:26.181749-07:00
                 > repository size: 4.453074629 GB
         stdout:
-            > bs error:\s+/.*/.config/borg-space/settings.nt, repositories:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories:
             >     expected key:value pair.
             >            2 ❬    - home❭
             >                   ▲
@@ -1173,3 +1175,108 @@ test_main:
             >         2023-05-27T11:32:26.181749-07:00
             >         2023-05-27T11:32:26.181749-07:00
 
+    grinder:
+        # unknown repository error
+        args: injection-puffin
+        stdout:
+            > bs error:\s+injection-puffin@❬HOST❭~❬USER❭:\s+unknown repository.
+        status: 1
+
+    spirit:
+        # bad latest file for repository
+        args: home
+        tmp_files:
+            .local/share/emborg/home.latest.nt:
+                > - create last run: 2023-06-02T10:24:24.658008-07:00
+                > - prune last run: 2023-05-27T11:32:21.495540-07:00
+                > - compact last run: 2023-05-27T11:32:26.181749-07:00
+                > - repository size: 4.453074629 GB
+        stdout:
+            > bs error:\s+home@❬HOST❭~❬USER❭:\s+content must start with key or brace \({\)\.
+            >        \s*1 ❬- create last run: 2023-06-02T10:24:24.658008-07:00❭
+        status: 1
+
+    galley:
+        # unreadable latest filefor repository
+        args: home
+        tmp_files:
+            .local/share/emborg/home.latest.nt:
+                mode: 0o000
+        stdout:
+            > bs error:\s+home@❬HOST❭~❬USER❭:\s+❬HOME❭/.local/share/emborg/home.latest.nt:\s+permission denied.
+        status: 1
+
+    railcard:
+        # bad config file
+        args: home
+        tmp_files:
+            .config/borg-space/settings.nt:
+                > - default repository: home
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt:
+            >     content must start with key or brace \({\)\.
+            >            1 ❬- default repository: home❭
+            >
+        status: 1
+
+    bodice:
+        # bad report_fields setting
+        args: home
+        tmp_files:
+            .config/borg-space/settings.nt:
+                > report_fields:
+                >     must-not-be-a-dictionary:
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, report_fields:
+            >     expected a list or string.
+            >            2 ❬    must-not-be-a-dictionary:❭
+            >                   ▲
+        status: 1
+
+    reprimand:
+        # unreadable settings file
+        tmp_files:
+            .config/borg-space/settings.nt:
+                mode: 0o000
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt:\s+permission denied.
+        status: 1
+
+    prelude:
+        # bad repository name
+        args: home
+        tmp_files:
+            .config/borg-space/settings.nt:
+                > repositories:
+                >     home+primary: home
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+primary:
+            >     key contains an invalid character: ‘\+’\.
+            >            2 ❬    home\+primary: home❭
+            >                   ▲
+        status: 1
+
+    misdo:
+        # bad repository name
+        args: home
+        tmp_files:
+            .config/borg-space/settings.nt:
+                > repositories:
+                >     home+!primary: home
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+!primary:
+            >     key contains invalid characters: ‘!\+’\.
+            >            2 ❬    home\+!primary: home❭
+            >                   ▲
+        status: 1
+
+    moisten:
+        # bad repository value
+        args: home
+        tmp_files:
+            .config/borg-space/settings.nt:
+                > repositories:
+                >     home: home+primary
+        stdout:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt:\s+value contains an invalid character: ‘\+’
+        status: 1
