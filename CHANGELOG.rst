@@ -10,9 +10,9 @@ Latest development release
 2.2.0 (2023-06-11)
 ------------------
 
-This version allows host names to begin with a digit and improves the 
-consistency of error the error handling.  It also improves the formatting of the 
-X and Y axis labels.
+- Improves the formatting of the X and Y axis labels in graphs.
+- Allows host names to begin with a digit.
+- Improves the consistency of the error handling.
 
 
 2.1.0 (2023-06-09)
