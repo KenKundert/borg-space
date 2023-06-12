@@ -83,7 +83,7 @@ def check_command(name, args, env, stdout, stderr, status, home):
     stderr = sub_local_names(stderr, home=home)
     stdout = sub_local_names(stdout, home=home)
 
-    print(f"Running: {name}")
+    print(f"Test name: {name}")
     borg_space = Run(cmd, "sOEW*", env=env)
     # debug(result=borg_space.stdout)
     # debug(expected=stdout)

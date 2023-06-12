@@ -56,12 +56,9 @@ class Repository:
 
         self.spec = spec
         self.name = name
-        try:
-            self.config = a_name(config)
-            self.host = a_name(host) or hostname
-            self.user = a_name(user) or username
-        except Invalid as e:
-            raise Error(e)
+        self.config = a_name(config)
+        self.host = a_name(host) or hostname
+        self.user = a_name(user) or username
         self.latest = None
 
     def __str__(self):
@@ -182,8 +179,8 @@ def a_name(arg, is_key=False):
         return arg
     if not is_str(arg):
         raise Invalid("expected a string")
-    cleaned = 'A' + arg.replace('-', '0')
-        # add 'A' prefix to allow leading digits, replace '-' to allow dashes
+    cleaned = '_' + arg.replace('-', '_')
+        # add prefix to allow leading digits, replace '-' to allow dashes
     if not cleaned.isidentifier():
         from string import ascii_letters as letters, digits
         invalid = ''.join(sorted(set(cleaned) - set(letters + digits + '-_')))
@@ -261,23 +258,26 @@ try:
 
     # convert from specifications to Repository objects
     repositories = {}
-    for name, specs in specifications.items():
-        if specs:
-            repositories[name] = []
-            alias = name if len(specs) <= 1 else None
-            for spec in specs:
-                if spec in repositories and spec != name:
-                    # this is a known (previously defined) repository
-                    repositories[name].extend(repositories[spec])
-                else:
-                    repositories[name].append(Repository(spec, alias))
-        else:
-            repositories[name] = [Repository(name)]
+    try:
+        for name, specs in specifications.items():
+            if specs:
+                repositories[name] = []
+                alias = name if len(specs) <= 1 else None
+                for spec in specs:
+                    if spec in repositories and spec != name:
+                        # this is a known (previously defined) repository
+                        repositories[name].extend(repositories[spec])
+                    else:
+                        repositories[name].append(Repository(spec, alias))
+            else:
+                repositories[name] = [Repository(name)]
+    except Invalid as e:
+        raise Error(e, culprit=name)
 
-except Error as e:
-    e.report(culprit=settings_file)
 except nt.NestedTextError as e:
     e.report()
+except Error as e:
+    e.report(culprit=(settings_file,) + e.culprit)
 except FileNotFoundError:
     settings = {}
     repositories = {}
