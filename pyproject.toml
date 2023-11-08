@@ -7,7 +7,7 @@ readme = "README.rst"
 requires-python = ">=3.6"
 license = {file = "LICENSE"}
 keywords = ["emborg", "borg", "backups"]
-authors = [{name = "Ken Kundert", email = "emborg@nurdletech.com"}]
+authors = [{name = "Ken Kundert", email = "borg-space@nurdletech.com"}]
 classifiers = [
     "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Natural Language :: English",
@@ -24,6 +24,7 @@ dependencies = [
     "nestedtext",
     "quantiphy",
     "shlib",
+    #"voluptuous>=0.14",  # this version has the key error reporting fix
     "voluptuous",
 ]
 

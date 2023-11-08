@@ -21,6 +21,11 @@
 #             ├── test_world_02.py
 #             └── test_world_03.py
 
+# TODO
+# consider adding the ability to handle multiline leaf values
+#     see: https://calmcode.io/pyinstrument/scripts.html
+
+
 # Imports {{{1
 from inform import Info, conjoin, is_collection
 
