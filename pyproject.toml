@@ -24,8 +24,7 @@ dependencies = [
     "nestedtext",
     "quantiphy",
     "shlib",
-    #"voluptuous>=0.14",  # this version has the key error reporting fix
-    "voluptuous",
+    "voluptuous>=0.14",
 ]
 
 [project.urls]

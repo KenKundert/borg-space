@@ -1251,17 +1251,9 @@ test_main:
                 >     home+primary: home
         stdout:
             > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+primary:
-            >     unknown key.
-        # stdout:
-        #     > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+primary:
-        #     >     key contains an invalid character: ‘\+’\.
-        #     >            2 ❬    home\+primary: home❭
-        #     >                   ▲
-            # The released version of voluptuous outputs ‘unknown key’ for any
-            # error involving a key.  I have submitted a pull request to 
-            # voluptuous to allow error messages that are specific to the 
-            # problem.  When incorporated, borg-space will report an invalid 
-            # character.
+            >     key contains an invalid character: ‘\+’\.
+            >            2 ❬    home\+primary: home❭
+            >                   ▲
         status: 1
 
     misdo:
@@ -1273,17 +1265,9 @@ test_main:
                 >     home+!primary: home
         stdout:
             > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+!primary:
-            >     unknown key.
-        # stdout:
-        #     > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, repositories, home\+!primary:
-        #     >     key contains invalid characters: ‘!\+’\.
-        #     >            2 ❬    home\+!primary: home❭
-        #     >                   ▲
-            # The released version of voluptuous outputs ‘unknown key’ for any
-            # error involving a key.  I have submitted a pull request to 
-            # voluptuous to allow error messages that are specific to the 
-            # problem.  When incorporated, borg-space will report the invalid 
-            # characters.
+            >     key contains invalid characters: ‘!\+’\.
+            >            2 ❬    home\+!primary: home❭
+            >                   ▲
         status: 1
 
     moisten:

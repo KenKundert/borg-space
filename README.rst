@@ -32,6 +32,10 @@ To show the size of one or more repositories, simply run::
     # borg-space home
     home: 12.81 GB
 
+This reports on the latest repository size and, of course, assumes that you have 
+already run *emborg create*.  You must not use the ``--fast`` command line 
+option when running *create*.
+
 You can specify any number of repositories, and they can be composites.  In the 
 following example, *home* is an alias that expands to *borgbase* and *rsync*::
 

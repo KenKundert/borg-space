@@ -85,8 +85,6 @@ def check_command(name, args, env, stdout, stderr, status, home):
 
     print(f"Test name: {name}")
     borg_space = Run(cmd, "sOEW*", env=env)
-    # debug(result=borg_space.stdout)
-    # debug(expected=stdout)
     Matches(stderr, flags=re.DOTALL).assert_matches(borg_space.stderr)
     Matches(stdout, flags=re.DOTALL).assert_matches(borg_space.stdout)
     assert status == borg_space.status
