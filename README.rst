@@ -321,12 +321,12 @@ Install with::
     > pip3 install borg-space
 
 
-Assimilate
-----------
+Borg 2
+------
 
-*Borg_ 2* will be released soon, and with it will come *Assimilate_*, the next 
-generation of *Emborg_*.  *Assimilate* is intended to be used with *Borg 2.0* 
-and newer while *Emborg* would be used with older versions of *Borg*.  Currently 
+Borg_ 2 will be released soon, and with it will come Assimilate_, the next 
+generation of Emborg_.  *Assimilate* is intended to be used with *Borg 2.0* and 
+beyond while *Emborg* would be used with older versions of *Borg*.  Currently 
 *Borg-Space* does not support *Assimilate* directly, but the *latest.nt* files 
 produced by *Assimilate* are compatible with *Borg-Space*, only their location 
 differs.  You can get the current version of *Borg-Space* to read *Assimilate* 
