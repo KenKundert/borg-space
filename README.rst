@@ -321,6 +321,26 @@ Install with::
     > pip3 install borg-space
 
 
+Assimilate
+----------
+
+*Borg_ 2* will be released soon, and with it will come *Assimilate_*, the next 
+generation of *Emborg_*.  *Assimilate* is intended to be used with *Borg 2.0* 
+and newer while *Emborg* would be used with older versions of *Borg*.  Currently 
+*Borg-Space* does not support *Assimilate* directly, but the *latest.nt* files 
+produced by *Assimilate* are compatible with *Borg-Space*, only their location 
+differs.  You can get the current version of *Borg-Space* to read *Assimilate* 
+*latest.nt* files by simply creating a symbolic link from the expected location 
+to the actual location.  For example, if you convert your *home* repository from 
+*Emborg* to *Assimilate*, you can use the following commands to get *Borg-Space* 
+to use the *latest.nt* file produced by *Assimilate*::
+
+    cd ~/.local/share/emborg
+    rm home.latest.nt
+    ln -s ../assimilate/home.latest.nt .
+
+.. _assimilate: https://assimilate.readthedocs.io
+.. _borg: https://borgbackup.readthedocs.io
 .. _emborg: https://emborg.readthedocs.io
 .. _nestedtext: https://nestedtext.org
 .. _arrow: https://arrow.readthedocs.io/en/latest/guide.html#supported-tokens

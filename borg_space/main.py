@@ -32,11 +32,10 @@ Settings are held in ~/.config/borg-space/settings.nt.
 
 # imports {{{1
 from .config import settings, get_repos
-from .trees import tree
 import arrow
 from appdirs import user_data_dir
 from docopt import docopt
-from inform import Error, display, error, os_error, terminate, warn
+from inform import Error, display, error, os_error, terminate, warn, tree
 from pathlib import Path
 from quantiphy import Quantity
 import json
@@ -45,6 +44,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 from matplotlib.ticker import FuncFormatter
+# from labellines import labelLines
+
 
 # globals {{{1
 data_dir = Path(user_data_dir('borg-space'))
@@ -174,6 +175,7 @@ def generate_graph(repos, svg_file, log_scale):
 
     # draw the graph {{{3
     ax.legend(loc='upper left')
+    # labelLines(ax.get_lines())
     if svg_file:
         plt.savefig(svg_file)
     else:
@@ -269,7 +271,7 @@ def print_tree_report(repos):
                 fmt = formatter,
                 fields = fields,
                 missing = not_available,
-            )
+            ), squeeze=True
         )
     )
 

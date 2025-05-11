@@ -113,7 +113,7 @@ class Repository:
         raw_data = nt.loads(content)
         self.latest = data = {}
         if 'repository size' in raw_data:
-            data['size'] = Quantity(raw_data['repository size'], 'B')
+            data['size'] = Quantity(raw_data['repository size'], 'B', binary=True)
         if 'create last run' in raw_data:
             data['last_create'] = arrow.get(raw_data['create last run'])
         if 'prune last run' in raw_data:
