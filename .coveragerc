@@ -5,4 +5,4 @@ exclude_lines =
 
 [run]
 source = borg_space
-omit = */.tox/*
+omit = */.tox/* tests
