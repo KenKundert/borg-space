@@ -1,7 +1,7 @@
 [project]
 name = "borg_space"
 dist-name = "borg-space"
-version = "2.2"
+version = "2.3"
 description = "Accessory for Emborg used to report and track the size of your Borg repositories"
 readme = "README.rst"
 requires-python = ">=3.6"
