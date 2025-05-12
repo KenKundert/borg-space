@@ -7,6 +7,11 @@ Latest development release
 | Released: 2025-05-11
 
 
+2.3.0 (2025-05-11)
+------------------
+- Minor refinements.
+
+
 2.2.0 (2023-06-11)
 ------------------
 
