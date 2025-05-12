@@ -339,6 +339,9 @@ to use the *latest.nt* file produced by *Assimilate*::
     rm home.latest.nt
     ln -s ../assimilate/home.latest.nt .
 
+*Assimilate* only saves the space used by the repository when running 
+a *compact* command and only if the *get_repo_size* is set to ``'yes``.
+
 .. _assimilate: https://assimilate.readthedocs.io
 .. _borg: https://borgbackup.readthedocs.io
 .. _emborg: https://emborg.readthedocs.io
