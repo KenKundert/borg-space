@@ -168,7 +168,7 @@ def to_list(args):
     if is_str(args):
         args = args.split()
     if is_mapping(args):
-        raise Invalid(f"expected a list or string")
+        raise Invalid("expected a list or string")
     return args
 
 # a_name() {{{2

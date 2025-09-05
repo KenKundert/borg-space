@@ -5,13 +5,12 @@
 #     allow running without repositories setting
 
 # IMPORTS {{{1
-import pytest, os
-from parametrize_from_file import parametrize, defaults
+from parametrize_from_file import parametrize
 from pytest_tmp_files import tmp_file_type
 from functools import partial
 from quantiphy import UnitConversion, Quantity
 from re_assert import Matches
-from shlib import Run, ln, lsf, rm
+from shlib import Run
 from voluptuous import Schema, Optional, Required, Any
 import re
 import os

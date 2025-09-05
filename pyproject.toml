@@ -40,3 +40,16 @@ borg-space = "borg_space.main:main"
 [build-system]
 requires = ["flit_core >=2,<4"]
 build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+addopts = "--tb=short"
+
+[tool.ruff]
+exclude = [".tox", "doc", "Diffs"]
+
+[tool.ruff.lint]
+select = ["F"]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"borg_space/__init__.py" = ["F401"]
