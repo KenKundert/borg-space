@@ -32,7 +32,6 @@ if new_home:  # pragma: no cover
 
 # GLOBALS {{{1
 set_prefs(use_inform=True)
-settings_file = to_path(user_config_dir('borg-space')) / 'settings.nt'
 voluptuous_error_msg_mappings = {
     "extra keys not allowed": ("unknown key", "key"),
     "expected a dictionary": ("expected key:value pair", "value"),
@@ -41,24 +40,43 @@ voluptuous_key_prefix = "key contains"
 hostname = socket.gethostname().split('.')[0]
     # version of the hostname (the hostname without any domain name)
 username = pwd.getpwuid(os.getuid()).pw_name
+program_name = 'borg-space'
+if 'XDG_CONFIG_HOME' in os.environ:
+    config_dir = os.sep.join([os.environ['XDG_CONFIG_HOME'], program_name])
+else:
+    config_dir = user_config_dir(program_name)
+settings_file = to_path(config_dir) / 'settings.nt'
 
 
 # REPOSITORY {{{1
 # Repository class {{{2
 class Repository:
     def __init__(self, spec, name=None):
-        prefix, _, user = spec.partition('~')
-        config, _, host = prefix.partition('@')
+        if is_str(spec):
+            prefix, _, user = spec.partition('~')
+            config, _, host = prefix.partition('@')
+            path = None
+        else:
+            user = spec.get('user')
+            config = spec.get('config')
+            host = spec.get('host')
+            path = spec.get('path')
+            spec = spec.get('spec')
+
         if not config:
             raise Error("spec is missing Emborg config name.", culprit=spec)
         if not name:
             name = spec
 
-        self.spec = spec
-        self.name = name
-        self.config = a_name(config)
-        self.host = a_name(host) or hostname
-        self.user = a_name(user) or username
+        try:
+            self.spec = spec
+            self.name = name
+            self.config = a_name(config)
+            self.host = a_name(host) or hostname
+            self.user = a_name(user) or username
+            self.path = path
+        except Invalid:
+            raise Error(e, culprit=spec)
         self.latest = None
 
     def __str__(self):
@@ -87,14 +105,21 @@ class Repository:
             user = self.user,
             full_spec = str(self)
         )
-        info.update(self.latest)
+        if self.latest:
+            info.update(self.latest)
         return info
 
     def get_path(self):
         user = self.user if self.user else getpass.getuser()
         config = self.config
         assert config
-        path = f"~{user}/.local/share/emborg/{config}.latest.nt"
+        path = self.path
+        if not path:
+            path = settings.get(
+                'default_path',
+                "~{user}/.local/share/emborg/{config}.latest.nt"
+            )
+        path = path.format(**self.as_dict())
         return (self.host, path)
 
     def get_latest(self):
@@ -109,7 +134,7 @@ class Repository:
             try:
                 content = to_path(path).read_text()
             except FileNotFoundError:
-                raise Error('unknown repository.', culprit=str(self))
+                raise Error(f'repository not found: {path}', culprit=str(self))
         raw_data = nt.loads(content)
         self.latest = data = {}
         if 'repository size' in raw_data:
@@ -131,24 +156,26 @@ def get_repos(spec):
     if not spec:
         raise Error('there is no default repository.')
 
-    try:
-        children = repositories[spec]
-    except (TypeError, KeyError):
-        # not found in repositories specified in settings file.
-        # see if it exists on local machine
-        children = [Repository(spec)]
-
-    results = {}
-    for child in children:
-        host, path = child.get_path()
-        name = str(child)
+    specs = spec.split()
+    for spec in specs:
         try:
-            child.get_latest()
-            results[name] = child
-        except Error as e:
-            e.report(culprit=name)
-        except OSError as e:
-            error(os_error(e), culprit=name)
+            children = repositories[spec]
+        except (TypeError, KeyError):
+            # not found in repositories specified in settings file.
+            # see if it exists on local machine
+            children = [Repository(spec)]
+
+        results = {}
+        for child in children:
+            # host, path = child.get_path()
+            name = str(child)
+            try:
+                child.get_latest()
+                results[name] = child
+            except Error as e:
+                e.report(culprit=name)
+            except OSError as e:
+                error(os_error(e), culprit=name)
     return results
 
 
@@ -200,7 +227,7 @@ def a_spec(arg):
     if is_str(arg):
         return arg
     if is_mapping(arg):
-        unknown_keys = arg.keys() - set(['config', 'host', 'user'])
+        unknown_keys = arg.keys() - set(['config', 'host', 'user', 'path'])
         if unknown_keys:
             raise Invalid(f"unknown {plural(unknown_keys):key}: {conjoin(unknown_keys)}.")
         if 'config' not in arg:
@@ -210,7 +237,8 @@ def a_spec(arg):
             spec = f"{spec}@{arg.get('host')}"
         if arg.get('user'):
             spec = f"{spec}~{arg.get('user')}"
-        return spec
+        arg['spec'] = spec
+        return arg
     raise Invalid("expected a specification")
 
 # to_specs() {{{2
@@ -218,7 +246,7 @@ def to_specs(arg):
     if is_str(arg):
         return [a_spec(r) for r in arg.split()]
     if is_mapping(arg):
-        unknown_keys = arg.keys() - set(['config', 'host', 'user'])
+        unknown_keys = arg.keys() - set(['config', 'host', 'user', 'path'])
         if unknown_keys:
             raise Invalid(f"unknown {plural(unknown_keys):key}: {conjoin(unknown_keys)}.")
         return [a_spec(arg)]
@@ -230,6 +258,7 @@ def to_specs(arg):
 validate_settings = Schema({
     'repositories': {key_as_name: to_specs},
     'default_repository': str,
+    'default_path': str,
     'report_style': str,
     'compact_format': str,
     'table_format': str,
@@ -264,9 +293,12 @@ try:
                 repositories[name] = []
                 alias = name if len(specs) <= 1 else None
                 for spec in specs:
-                    if spec in repositories and spec != name:
+                    specname = spec
+                    if is_mapping(spec):
+                        specname = spec['spec']
+                    if specname in repositories and specname != name:
                         # this is a known (previously defined) repository
-                        repositories[name].extend(repositories[spec])
+                        repositories[name].extend(repositories[specname])
                     else:
                         repositories[name].append(Repository(spec, alias))
             else:

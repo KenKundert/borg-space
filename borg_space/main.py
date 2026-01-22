@@ -31,7 +31,7 @@ Settings are held in ~/.config/borg-space/settings.nt.
 """
 
 # imports {{{1
-from .config import settings, get_repos
+from .config import settings, get_repos, program_name
 import arrow
 from appdirs import user_data_dir
 from docopt import docopt
@@ -45,10 +45,14 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import AutoDateFormatter, AutoDateLocator
 from matplotlib.ticker import FuncFormatter
 # from labellines import labelLines
+import os
 
 
 # globals {{{1
-data_dir = Path(user_data_dir('borg-space'))
+if 'XDG_DATA_HOME' in os.environ:
+    data_dir = os.sep.join([os.environ['XDG_DATA_HOME'], program_name])
+else:
+    data_dir = user_data_dir(program_name)
 now = str(arrow.now())
 Quantity.set_prefs(prec='full')
 __version__ = "2.3"
@@ -330,7 +334,7 @@ def main():
 
     requests = cmdline['<spec>']
     if not requests:
-        requests = ['']  # this gets the default config
+        requests = settings.get('default_repository', '').split()
 
     try:
         repos = collect_repos(requests, cmdline['--record'])

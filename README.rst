@@ -103,6 +103,7 @@ You can create a NestedText_ settings file to specify default behaviors and
 define composite repositories.  For example::
 
     default repository: home
+    default path: ~{user}/.local/share/assimilate/{config}.latest.nt
     report style: tree
     compact format: {name}: {size:{fmt}}.  Last back up: {last_create:ddd, MMM DD}.  Last squeeze: {last_squeeze:ddd, MMM DD}.
     table format: {host:<8} {user:<5} {config:<9} {size:<8.2b} {last_create:ddd, MMM DD}
@@ -118,7 +119,11 @@ define composite repositories.  For example::
         dev: root@dev~root
         mail: root@mail~root
         files: root@files~root
-        bastion: root@bastion~root
+        bastion:
+            config: root
+            host: bastion
+            user: root
+            path: /root/.local/share/emborg/root.latest.nt
         media: root@media~root
         web: root@web~root
         cluster: home@cluster
@@ -138,7 +143,17 @@ define composite repositories.  For example::
             children: home servers root
 
 default repository:
-    The name of the repository to be used if none are given on the command line.
+    The name (or names) of the repository to be used if none are given on the 
+    command line.
+
+default path:
+    The path to the *Emborg* or *Assimilate* generated latest.nt files.  If not 
+    give, it defaults to::
+
+      ~{user}/.local/share/emborg/{config}.latest.nt
+
+    ``{config}``, ``{host}`` and ``{user}`` are placeholders that are replaced 
+    by the corresponding component of the repository specification.
 
 report style:
     The report style to be used if none is specified on the command line.  
@@ -234,6 +249,7 @@ repositories:
                 config: home
                 host: host
                 user: user
+                path: ~user/.local/share/emborg/home.latest.nt
 
         repositiories:
             all: home@host~user work@host~user
@@ -252,6 +268,7 @@ repositories:
                     config: home
                     host: host
                     user: user
+                    path: ~user/.local/share/emborg/home.latest.nt
                 -
                     config: work
                     host: host
@@ -314,30 +331,22 @@ scaled nicely on the same graph::
 Installation
 ------------
 
-*Borg-Space* requires *Emborg* version 1.37 or newer.
+*Borg-Space* requires *Emborg* version 1.37 or newer or *Assimilate*.
 
 Install with::
 
     > pip3 install borg-space
 
 
-Borg 2
-------
+Assimilate and Borg 2
+---------------------
 
 Borg_ 2 will be released soon, and with it will come Assimilate_, the next 
 generation of Emborg_.  *Assimilate* is intended to be used with *Borg 2.0* and 
-beyond while *Emborg* would be used with older versions of *Borg*.  Currently 
-*Borg-Space* does not support *Assimilate* directly, but the *latest.nt* files 
-produced by *Assimilate* are compatible with *Borg-Space*, only their location 
-differs.  You can get the current version of *Borg-Space* to read *Assimilate* 
-*latest.nt* files by simply creating a symbolic link from the expected location 
-to the actual location.  For example, if you convert your *home* repository from 
-*Emborg* to *Assimilate*, you can use the following commands to get *Borg-Space* 
-to use the *latest.nt* file produced by *Assimilate*::
-
-    cd ~/.local/share/emborg
-    rm home.latest.nt
-    ln -s ../assimilate/home.latest.nt .
+beyond while *Emborg* would be used with older versions of *Borg*.  To use 
+*Assimilate* you should set the *default path* accordingly.  To support both 
+*Emborg* and *Assimilate* simultaneously, you should set *default path* for one 
+and then use *path* overrides for individual repositories.
 
 *Assimilate* only saves the space used by the repository when running 
 a *compact* command and only if the *get_repo_size* is set to ``'yes``.
