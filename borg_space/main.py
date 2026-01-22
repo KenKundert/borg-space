@@ -69,6 +69,8 @@ not_available = "⟪not available⟫"
 # collect_repos() {{{1
 def collect_repos(requests, record_size):
     repos = {}
+    if not requests:
+        raise Error('there is no default repository.')
     for request in requests:
         new_repos = get_repos(request)
         repos.update(new_repos)
@@ -78,7 +80,7 @@ def collect_repos(requests, record_size):
         for name, repo in repos.items():
 
             # read previously recorded sizes
-            data_path = Path(data_dir / f'{name}.nt')
+            data_path = Path(data_dir) / f'{name}.nt'
             try:
                 data = nt.load(data_path, top=dict)
             except FileNotFoundError:

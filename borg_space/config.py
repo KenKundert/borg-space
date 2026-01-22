@@ -75,7 +75,7 @@ class Repository:
             self.host = a_name(host) or hostname
             self.user = a_name(user) or username
             self.path = path
-        except Invalid:
+        except Invalid as e:
             raise Error(e, culprit=spec)
         self.latest = None
 
@@ -119,7 +119,7 @@ class Repository:
                 'default_path',
                 "~{user}/.local/share/emborg/{config}.latest.nt"
             )
-        path = path.format(**self.as_dict())
+        path = path.format(user=user, config=config)
         return (self.host, path)
 
     def get_latest(self):
@@ -153,8 +153,6 @@ class Repository:
 def get_repos(spec):
     if not spec:
         spec = settings.get('default_repository')
-    if not spec:
-        raise Error('there is no default repository.')
 
     specs = spec.split()
     for spec in specs:

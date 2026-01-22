@@ -152,8 +152,8 @@ default path:
 
       ~{user}/.local/share/emborg/{config}.latest.nt
 
-    ``{config}``, ``{host}`` and ``{user}`` are placeholders that are replaced 
-    by the corresponding component of the repository specification.
+    ``{config}`` and ``{user}`` are placeholders that are replaced by the 
+    corresponding component of the repository specification.
 
 report style:
     The report style to be used if none is specified on the command line.  

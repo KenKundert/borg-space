@@ -1179,7 +1179,7 @@ test_main:
         # unknown repository error
         args: injection-puffin
         stdout:
-            > bs error:\s+injection-puffin@❬HOST❭~❬USER❭:\s+unknown repository.
+            > bs error:\s+injection-puffin@❬HOST❭~❬USER❭:\s+repository not found:.*.
         status: 1
 
     spirit:
@@ -1278,6 +1278,6 @@ test_main:
                 > repositories:
                 >     home: home+primary
         stdout:
-            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, home:
+            > bs error:\s+❬HOME❭/.config/borg-space/settings.nt, home\+primary:
             >     value contains an invalid character: ‘\+’
         status: 1
