@@ -50,9 +50,9 @@ import os
 
 # globals {{{1
 if 'XDG_DATA_HOME' in os.environ:
-    data_dir = os.sep.join([os.environ['XDG_DATA_HOME'], program_name])
+    data_dir = Path(os.sep.join([os.environ['XDG_DATA_HOME'], program_name]))
 else:
-    data_dir = user_data_dir(program_name)
+    data_dir = Path(user_data_dir(program_name))
 now = str(arrow.now())
 Quantity.set_prefs(prec='full')
 __version__ = "2.3"
@@ -80,7 +80,7 @@ def collect_repos(requests, record_size):
         for name, repo in repos.items():
 
             # read previously recorded sizes
-            data_path = Path(data_dir) / f'{name}.nt'
+            data_path = data_dir / f'{name}.nt'
             try:
                 data = nt.load(data_path, top=dict)
             except FileNotFoundError:
