@@ -7,6 +7,11 @@ Latest development release
 | Released: 2025-05-11
 
 
+2.4.0 (2026-01-27)
+------------------
+- Support `Assimilate <https://assimilate.readthedocs.io/en/latest>`_.
+
+
 2.3.0 (2025-05-11)
 ------------------
 - Minor refinements.
