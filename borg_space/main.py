@@ -55,8 +55,8 @@ else:
     data_dir = Path(user_data_dir(program_name))
 now = str(arrow.now())
 Quantity.set_prefs(prec='full')
-__version__ = "2.4"
-__released__ = "2026-01-27"
+__version__ = "2.5"
+__released__ = "2026-06-28"
 date_format = settings.get('date_format', 'D MMMM YYYY')
 size_format = settings.get('size_format', '.2b')
 nestedtext_size_format = settings.get('nestedtext_size_format', size_format)
