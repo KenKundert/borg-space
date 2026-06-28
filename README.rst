@@ -14,8 +14,9 @@ Borg-Space — Report and track the size of your Emborg repositories
 :Version: 2.4
 :Released: 2026-01-27
 
-*Borg-Space* is an accessory for Emborg_.  It reports on the space consumed by 
-your *BorgBackup* repositories.  You can get this information using the
+*Borg-Space* is an accessory for Emborg_ and Assimilate_.  It reports on the 
+space consumed by your *BorgBackup* repositories.  You can get this information 
+using the
 ``emborg info`` command, but there are several reasons to prefer *Borg-Space*.
 
 #. *Borg-Space* is capable of reporting on many repositories at once.

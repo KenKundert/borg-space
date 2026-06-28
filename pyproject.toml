@@ -38,7 +38,7 @@ changelog = "https://github.com/KenKundert/ntlog/blob/master/CHANGELOG.rst"
 borg-space = "borg_space.main:main"
 
 [build-system]
-requires = ["flit_core >=2,<4"]
+requires = ["flit_core >=2"]
 build-backend = "flit_core.buildapi"
 
 [tool.pytest.ini_options]

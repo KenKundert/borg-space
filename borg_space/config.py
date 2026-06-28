@@ -322,7 +322,7 @@ except MultipleInvalid as e:  # report schema violations
             flag = 'key'
         loc = keymap.get(tuple(err.path))
         codicil = loc.as_line(flag) if loc else None
-        keys = nt.join_keys(err.path, keymap=keymap)
+        keys = nt.get_keys(err.path, keymap=keymap, sep=', ')
         error(
             full_stop(msg),
             culprit = (settings_file, keys),

@@ -2,7 +2,7 @@
 
 set nonomatch
 
-rm -rf .mypy_cache .tox
+rm -rf .mypy_cache .tox .ruff_cache .coverage
 rm -f test.log test.log.nt
 
 # the rest is common to all python directories
