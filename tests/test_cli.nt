@@ -655,9 +655,9 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > ❬HOST❭
-            > └── ❬USER❭
+            > ╰── ❬USER❭
             >     ├── home: 4.15 GiB
-            >     └── work: 1.83 GiB
+            >     ╰── work: 1.83 GiB
 
     sitcom:
         # simple tree report style
@@ -681,9 +681,9 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > ❬HOST❭
-            > └── ❬USER❭
+            > ╰── ❬USER❭
             >     ├── home: 4.15 GiB
-            >     └── work: 1.83 GiB
+            >     ╰── work: 1.83 GiB
 
     hubby:
         # user-defined tree report style
@@ -711,15 +711,15 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > ❬HOST❭
-            > └── ❬USER❭
+            > ╰── ❬USER❭
             >     ├── home
             >     │   ├── size: 4.15 GiB
             >     │   ├── last create: 2 June 2023
-            >     │   └── last squeeze: 27 May 2023
-            >     └── work
+            >     │   ╰── last squeeze: 27 May 2023
+            >     ╰── work
             >         ├── size: 1.83 GiB
             >         ├── last create: 4 June 2023
-            >         └── last squeeze: 4 June 2023
+            >         ╰── last squeeze: 4 June 2023
 
     usurp:
         # nestedtext report style
@@ -1011,9 +1011,9 @@ test_main:
                 > repository size: 1.959665139 GB
         stdout:
             > ❬HOST❭
-            > └── ❬USER❭
+            > ╰── ❬USER❭
             >     ├── home: ⟪not available⟫
-            >     └── work: 1.83 GiB
+            >     ╰── work: 1.83 GiB
 
     contend:
         # user-defined tree report style
@@ -1037,15 +1037,15 @@ test_main:
                 > compact last run: 2023-06-04T13:25:32.162572-07:00
         stdout:
             > ❬HOST❭
-            > └── ❬USER❭
+            > ╰── ❬USER❭
             >     ├── home
             >     │   ├── size: 4.15 GiB
             >     │   ├── last create: 2 June 2023
-            >     │   └── last squeeze: 27 May 2023
-            >     └── work
+            >     │   ╰── last squeeze: 27 May 2023
+            >     ╰── work
             >         ├── size: ⟪not available⟫
             >         ├── last create: 4 June 2023
-            >         └── last squeeze: 4 June 2023
+            >         ╰── last squeeze: 4 June 2023
 
     reformist:
         # nestedtext report style
