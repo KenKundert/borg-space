@@ -1,7 +1,7 @@
 # These tests require that BorgBackup be installed,
 # which is not available on GitHub Actions.
 
-name: Emborg
+name: borg-space
 on: [push, pull_request]
 jobs:
   check-bats-version:
